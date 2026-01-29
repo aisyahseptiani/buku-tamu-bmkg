@@ -104,7 +104,9 @@
 <div class="card shadow-sm d-none" id="sectionGrafik">
     <div class="card-body">
         <h5 class="mb-3">Grafik Pengunjung</h5>
-        <canvas id="grafikPengunjung" height="120"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="grafikPengunjung"></canvas>
+        </div>
     </div>
 </div>
 
@@ -143,19 +145,50 @@ new Chart(document.getElementById('grafikPengunjung'), {
         datasets: [{
             label: 'Jumlah Pengunjung',
             data: data,
+
+                        backgroundColor: 'rgba(54, 162, 235, 0.65)',
+            hoverBackgroundColor: 'rgba(54, 162, 235, 0.85)',
+            borderRadius: 8,
+            barThickness: 26,
+            maxBarThickness: 30
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                display: false   // 🔥 biar clean
+            }
+        },
+
+        datasets: {
+            bar: {
+                categoryPercentage: 0.6, // 🔥 jarak antar tanggal
+                barPercentage: 0.6
+            }
+        },
+
         scales: {
             y: {
                 beginAtZero: true,
                 ticks: {
                     stepSize: 10
+                },
+                grid: {
+                    color: '#eaeaea',
+                    drawBorder: false
+                }
+            },
+            x: {
+                grid: {
+                    display: false
                 }
             }
         }
     }
 });
+
 </script>
 @endpush
