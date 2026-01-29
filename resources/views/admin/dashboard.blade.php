@@ -110,6 +110,13 @@
     </div>
 </div>
 
+<style>
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+}
+</style>
+
 @endsection
 
 @push('script')
@@ -146,11 +153,11 @@ new Chart(document.getElementById('grafikPengunjung'), {
             label: 'Jumlah Pengunjung',
             data: data,
 
-                        backgroundColor: 'rgba(54, 162, 235, 0.65)',
+            backgroundColor: 'rgba(54, 162, 235, 0.65)',
             hoverBackgroundColor: 'rgba(54, 162, 235, 0.85)',
-            borderRadius: 8,
-            barThickness: 26,
-            maxBarThickness: 30
+            borderRadius: 6,
+            barThickness: 18,
+            maxBarThickness: 20
         }]
     },
     options: {
@@ -159,31 +166,40 @@ new Chart(document.getElementById('grafikPengunjung'), {
 
         plugins: {
             legend: {
-                display: false   // 🔥 biar clean
+                display: false   
+            },
+            tooltip: {
+                padding:10
             }
+            
         },
 
         datasets: {
             bar: {
-                categoryPercentage: 0.6, // 🔥 jarak antar tanggal
+                categoryPercentage: 0.5, 
                 barPercentage: 0.6
             }
         },
 
         scales: {
+            x: {
+                ticks: {
+                    maxRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 10   // 🔥 BATASI JUMLAH TANGGAL
+                },
+                grid: {
+                    display: false
+                }
+            },
             y: {
                 beginAtZero: true,
                 ticks: {
-                    stepSize: 10
+                    precision: 0
                 },
                 grid: {
-                    color: '#eaeaea',
+                    color: '#eee',
                     drawBorder: false
-                }
-            },
-            x: {
-                grid: {
-                    display: false
                 }
             }
         }
