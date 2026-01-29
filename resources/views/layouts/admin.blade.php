@@ -46,16 +46,13 @@
 
             {{-- MOBILE --}}
             <span class="fw-bold text-dark d-lg-none">
-                BMKG
+                STAMET SSK II PEKANBARU
             </span>
 
             {{-- DESKTOP --}}
             <div class="d-none d-lg-block lh-sm">
                 <div class="fw-bold text-dark">
-                    Badan Meteorologi,
-                </div>
-                <div class="text-muted small">
-                    Klimatologi, dan Geofisika
+                    STAMET SSK II PEKANBARU
                 </div>
             </div>
         </a>
@@ -73,15 +70,13 @@
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/dashboard') ? 'active fw-semibold' : '' }}"
-                       href="{{ route('admin.dashboard') }}">
-                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                       href="{{ route('admin.dashboard') }}"> Dashboard
                     </a>
                 </li>
 
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/qr*') ? 'active fw-semibold' : '' }}"
-                       href="{{ route('admin.qr.index') }}">
-                        <i class="bi bi-qr-code me-1"></i> QR Pengunjung
+                       href="{{ route('admin.qr.index') }}"> QR Pengunjung
                     </a>
                 </li>
 
