@@ -15,15 +15,55 @@ class DashboardController extends Controller
     {
         $filter = $request->filter ?? 'hari';
 
+        $grafik = collect();
+        $pengunjungs = collect();
+        $rekapBulanan = collect();
+        $total = 0;
+
         /*
         ======================
-        TENTUKAN RANGE TANGGAL
+        FILTER TAHUNAN
         ======================
         */
-        if ($filter === 'hari') {
-            $from = Carbon::today()->startOfDay();
-            $to   = Carbon::today()->endOfDay();
-        } else {
+        if ($filter === 'tahun') {
+
+            $tahun = $request->tahun ?? now()->year;
+
+            // DATA ASLI (UNTUK PDF & REFERENSI)
+            $pengunjungs = Pengunjung::whereYear('created_at', $tahun)->get();
+
+            // REKAP PER BULAN
+            $raw = Pengunjung::whereYear('created_at', $tahun)
+                ->selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+                ->groupByRaw('MONTH(created_at)')
+                ->pluck('total', 'bulan');
+
+            for ($i = 1; $i <= 12; $i++) {
+
+                $jumlah = $raw[$i] ?? 0;
+
+                $rekapBulanan->push([
+                    'bulan' => $i,
+                    'nama_bulan' => Carbon::create()->month($i)->translatedFormat('F'),
+                    'total' => $jumlah
+                ]);
+
+                $grafik->push([
+                    'label' => Carbon::create()->month($i)->translatedFormat('F'),
+                    'total' => $jumlah
+                ]);
+            }
+
+            $total = $rekapBulanan->sum('total');
+        }
+
+        /*
+        ======================
+        FILTER HARI / RANGE
+        ======================
+        */
+        else {
+
             $from = $request->from
                 ? Carbon::parse($request->from)->startOfDay()
                 : now()->startOfMonth();
@@ -31,51 +71,33 @@ class DashboardController extends Controller
             $to = $request->to
                 ? Carbon::parse($request->to)->endOfDay()
                 : now()->endOfMonth();
-        }
 
-        /*
-        ======================
-        DATA TABEL
-        ======================
-        */
-        $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])
-            ->latest()
-            ->get();
+            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])
+                ->latest()
+                ->get();
 
-        $total = $pengunjungs->count();
+            $total = $pengunjungs->count();
 
-        /*
-        ======================
-        DATA GRAFIK (RAW)
-        ======================
-        */
-        $rawGrafik = Pengunjung::whereBetween('created_at', [$from, $to])
-            ->selectRaw('DATE(created_at) as tanggal, COUNT(*) as total')
-            ->groupByRaw('DATE(created_at)')
-            ->pluck('total', 'tanggal');
+            $rawGrafik = Pengunjung::whereBetween('created_at', [$from, $to])
+                ->selectRaw('DATE(created_at) as tanggal, COUNT(*) as total')
+                ->groupByRaw('DATE(created_at)')
+                ->pluck('total', 'tanggal');
 
-        /*
-        ======================
-        ISI TANGGAL KOSONG
-        ======================
-        */
-        $periode = CarbonPeriod::create(
-            $from->toDateString(),
-            $to->toDateString()
-        );
+            $periode = CarbonPeriod::create($from, $to);
 
-        $grafik = collect();
+            foreach ($periode as $date) {
+                $tgl = $date->toDateString();
 
-        foreach ($periode as $date) {
-            $tgl = $date->toDateString();
-            $grafik->push([
-                'tanggal' => $tgl,
-                'total'   => $rawGrafik[$tgl] ?? 0
-            ]);
+                $grafik->push([
+                    'label' => $date->translatedFormat('d M'),
+                    'total' => $rawGrafik[$tgl] ?? 0
+                ]);
+            }
         }
 
         return view('admin.dashboard', compact(
             'pengunjungs',
+            'rekapBulanan',
             'filter',
             'total',
             'grafik'
@@ -91,10 +113,17 @@ class DashboardController extends Controller
     {
         $filter = $request->filter ?? 'hari';
 
-        if ($filter === 'hari') {
-            $from = Carbon::today()->startOfDay();
-            $to   = Carbon::today()->endOfDay();
+        if ($filter === 'tahun') {
+
+            $tahun = $request->tahun ?? now()->year;
+
+            $pengunjungs = Pengunjung::whereYear('created_at', $tahun)->get();
+
+            $from = Carbon::create($tahun, 1, 1);
+            $to   = Carbon::create($tahun, 12, 31);
+
         } else {
+
             $from = $request->from
                 ? Carbon::parse($request->from)->startOfDay()
                 : now()->startOfMonth();
@@ -102,10 +131,9 @@ class DashboardController extends Controller
             $to = $request->to
                 ? Carbon::parse($request->to)->endOfDay()
                 : now()->endOfMonth();
-        }
 
-        $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])
-            ->get();
+            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
+        }
 
         $pdf = Pdf::loadView(
             'admin.dashboard-pdf',
@@ -113,9 +141,11 @@ class DashboardController extends Controller
         );
 
         return $pdf->download(
-            'dashboard-' . $from->format('d-m-Y') .
+            'dashboard-' .
+            $from->format('d-m-Y') .
             '_sd_' .
-            $to->format('d-m-Y') . '.pdf'
+            $to->format('d-m-Y') .
+            '.pdf'
         );
     }
 }
