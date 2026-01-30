@@ -15,32 +15,60 @@
 </div>
 
 {{-- ================= FILTER ================= --}}
-<form method="GET" class="row g-2 align-items-end mb-4">
-    <div class="col-md-3">
-        <label class="form-label">Filter</label>
-        <select name="filter" class="form-select">
-            <option value="hari" {{ request('filter')=='hari'?'selected':'' }}>Hari Ini</option>
-            <option value="minggu" {{ request('filter')=='minggu'?'selected':'' }}>Mingguan</option>
-            <option value="bulan" {{ request('filter')=='bulan'?'selected':'' }}>Bulanan</option>
-            <option value="tahun" {{ request('filter')=='tahun'?'selected':'' }}>Tahunan</option>
-        </select>
-    </div>
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="GET">
 
-    @if(request('filter') !== 'hari')
-        <div class="col-md-3">
-            <label class="form-label">Dari</label>
-            <input type="date" name="from" class="form-control" value="{{ request('from') }}">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Sampai</label>
-            <input type="date" name="to" class="form-control" value="{{ request('to') }}">
-        </div>
-    @endif
+            {{-- ROW UTAMA --}}
+            <div class="row g-3 align-items-end">
 
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Tampilkan</button>
+                {{-- JENIS FILTER --}}
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold mb-1">Jenis Filter</label>
+                    <select name="filter" class="form-select form-select-sm">
+                        <option value="hari" {{ request('filter')=='hari'?'selected':'' }}>Hari Ini</option>
+                        <option value="minggu" {{ request('filter')=='minggu'?'selected':'' }}>Mingguan</option>
+                        <option value="bulan" {{ request('filter')=='bulan'?'selected':'' }}>Bulanan</option>
+                        <option value="tahun" {{ request('filter')=='tahun'?'selected':'' }}>Tahunan</option>
+                    </select>
+                </div>
+
+                {{-- RENTANG TANGGAL --}}
+                @if(request('filter') !== 'hari')
+                <div class="col-md-5">
+                    <label class="form-label small fw-semibold mb-1 d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                             class="me-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+                        </svg>
+                        Rentang Tanggal
+                    </label>
+
+                    <div class="input-group input-group-sm">
+                        <input type="date" name="from" class="form-control"
+                               value="{{ request('from') }}">
+                        <span class="input-group-text bg-white">—</span>
+                        <input type="date" name="to" class="form-control"
+                               value="{{ request('to') }}">
+                    </div>
+                </div>
+                @endif
+
+                {{-- BUTTON --}}
+                <div class="col-md-2">
+                    <button class="btn btn-primary btn-sm w-100 fw-semibold">
+                        Tampilkan
+                    </button>
+                </div>
+
+            </div>
+
+        </form>
     </div>
-</form>
+</div>
+
 
 {{-- ================= SWITCH & DOWNLOAD ================= --}}
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -59,10 +87,7 @@
         </button>
     </div>
 
-    <a href="{{ route('admin.dashboard.exportPdf', request()->query()) }}"
-       class="btn btn-danger btn-sm">
-        Download PDF
-    </a>
+    
 </div>
 
 {{-- ================= TABEL ================= --}}
@@ -72,7 +97,7 @@
 
         {{-- ===== TAHUNAN ===== --}}
         @if($filter === 'tahun')
-            <table class="table table-bordered">
+            <table class="table table-bordered ">
                 <thead class="table-light">
                     <tr>
                         <th>Bulan</th>
@@ -129,6 +154,13 @@
             </div>
         @endif
     </div>
+</div>
+
+<div class="d-flex justify-content-end mt-3">
+    <a href="{{ route('admin.dashboard.exportPdf', request()->query()) }}"
+       class="btn btn-danger">
+         Download PDF
+    </a>
 </div>
 
 {{-- ================= GRAFIK ================= --}}
