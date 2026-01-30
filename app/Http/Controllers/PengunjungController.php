@@ -15,8 +15,9 @@ class PengunjungController extends Controller
      */
     public function step1(Request $request)
     {
-        // MODE PREVIEW (UNTUK DESAIN / LOCAL)
+        // MODE PREVIEW (LOCAL ONLY)
         if (app()->environment('local') && $request->query('preview')) {
+            session(['qr_token' => 'PREVIEW']);
             return view('pengunjung.step1');
         }
 
@@ -35,8 +36,12 @@ class PengunjungController extends Controller
      */
     public function postStep1(Request $request)
     {
-        if (!session()->has('qr_token')) {
-            abort(403);
+        // IZINKAN PREVIEW SAAT LOCAL
+        if (
+            !session()->has('qr_token') &&
+            !(app()->environment('local') && $request->query('preview'))
+        ) {
+            abort(403, 'Silakan scan QR terlebih dahulu.');
         }
 
         $request->validate([
@@ -63,9 +68,11 @@ class PengunjungController extends Controller
      * HALAMAN SURVEI
      * ============================
      */
-    public function survei()
-    {
-        if (!session()->has('pengunjung')) {
+    public function survei(Request $request) {
+        if (
+            !(app()->environment('local') && $request->query('preview')) &&
+            !session()->has('pengunjung')
+        ) {
             return redirect()->route('pengunjung.step1');
         }
 
@@ -111,12 +118,32 @@ class PengunjungController extends Controller
             ->with('success', 'Terima kasih, data berhasil dikirim.');
     }
 
-    public function storeSurvei(Request $request)
-    {
-        $request->validate([
-            'kepuasan'  => 'required',
-            'pelayanan' => 'required',
-            'saran'     => 'required',
-        ]);
+    public function storeSurvei(Request $request) {
+        if (!session()->has('pengunjung')) {
+        abort(403);
+    }
+
+    $request->validate([
+        'kepuasan'  => 'required',
+        'pelayanan' => 'required',
+        'saran'     => 'required|string',
+    ]);
+
+    $data = session('pengunjung');
+
+    Pengunjung::create([
+        'nama'              => $data['nama'],
+        'instansi'          => $data['instansi'] ?? null,
+        'tujuan'            => $data['tujuan'],
+        'no_hp'             => $data['no_hp'] ?? null,
+        'ip_address'        => $request->ip(),
+        'tanggal_kunjungan' => Carbon::now()->toDateString(),
+    ]);
+
+    session()->forget(['pengunjung', 'qr_token']);
+
+    return redirect()
+        ->route('pengunjung.step1')
+        ->with('success', 'Terima kasih, data berhasil dikirim.');
     }
 }

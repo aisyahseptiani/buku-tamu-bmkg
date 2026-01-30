@@ -34,7 +34,7 @@
 
 <body>
 
-{{-- NAVBAR --}}
+<!-- {{-- NAVBAR --}}
 <nav class="navbar navbar-light bg-white shadow-sm px-3">
     <div class="container-fluid d-flex align-items-center gap-3">
         <img src="{{ asset('images/logo-bmkg.png') }}" height="40" alt="BMKG">
@@ -44,7 +44,7 @@
             <div class="text-muted small">Klimatologi, dan Geofisika</div>
         </div>
     </div>
-</nav>
+</nav> -->
 
 {{-- CONTENT --}}
 <main class="container py-5">

@@ -8,206 +8,205 @@
 
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         body {
-            background-color: #f4f6fb;
-            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #f6f8fc, #eef2f8);
+            font-family: 'Segoe UI', system-ui, sans-serif;
             font-size: 0.95rem;
+            color: #111827;
         }
 
-        /* ================= NAVBAR ================= */
-        .navbar-brand {
-            font-size: 0.95rem;
-        }
-
-        /* ================= CARD ================= */
-        .card-step {
+        /* CARD */
+        .card-survei {
             border: none;
-            border-radius: 18px;
-            box-shadow: 0 12px 30px rgba(0,0,0,.08);
+            border-radius: 22px;
+            background: #ffffff;
+            box-shadow: 0 20px 40px rgba(0,0,0,.08);
         }
 
-        .step-title {
+        /* HEADER CARD */
+        .card-header-custom {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* TITLE */
+        .title {
             font-weight: 800;
-            font-size: 1.15rem;
+            letter-spacing: .5px;
+            font-size: 1.25rem;
+        }
+
+        .desc {
+            font-size: .9rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* LABEL */
+        .form-label {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        /* DROPDOWN PREMIUM */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper svg {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .form-select {
+            /* appearance: none;
+            background-color: #f9fafb;
+            border-radius: 14px;
+            padding: 14px 46px 14px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 2px solid #e5e7eb;
+            transition: all .2s ease; */
+
+            appearance: none;          /* Standard */
+            -webkit-appearance: none;  /* Chrome / Safari */
+            -moz-appearance: none;     /* Firefox */
+            background-image: none !important;
+        }
+
+        .form-select:focus {
+            background-color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,.15);
+        }
+
+        /* BUTTON */
+        .btn-submit {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            padding: 14px;
+            font-weight: 700;
+            font-size: .9rem;
+            border-radius: 14px;
             letter-spacing: .4px;
         }
 
-        .step-desc {
-            color: #6c757d;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        /* ================= FORM ================= */
-        .form-label {
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 10px;
-            padding: 10px 12px;
-            font-size: 0.9rem;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: none;
-            border-color: #4f8cff;
-        }
-
-        /* ================= BUTTON ================= */
-        .btn-next {
-            background: linear-gradient(90deg, #4f8cff, #3b73e6);
-            border: none;
-            padding: 11px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border-radius: 10px;
-        }
-
-        .btn-next:hover {
-            background: linear-gradient(90deg, #3b73e6, #2f5fd0);
-        }
-
-        /* ================= POPUP THANK YOU ================= */
-        .thankyou-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,.75);
-            backdrop-filter: blur(6px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .thankyou-card {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 30px 26px;
-            max-width: 360px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,.12);
-            animation: popupScale .35s ease;
-        }
-
-        @keyframes popupScale {
-            from {
-                opacity: 0;
-                transform: scale(.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .thankyou-logo {
-            width: 60px;
-            margin-bottom: 10px;
-        }
-
-        .thankyou-icon {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto;
-            border-radius: 50%;
-            background: #e7f2ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .thankyou-icon i {
-            font-size: 32px;
-            color: #0d6efd;
-        }
-
-        .thankyou-card p {
-            font-size: 13px;
-            line-height: 1.6;
+        .btn-submit:hover {
+            opacity: .95;
         }
     </style>
 </head>
 
 <body>
 
-{{-- ================= NAVBAR ================= --}}
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm px-3 px-lg-4">
-    <div class="container-fluid">
-
-        <div class="navbar-brand d-flex align-items-center gap-2">
-            <img src="{{ asset('images/logo-bmkg.png') }}" alt="BMKG" height="38">
-            <div class="lh-sm">
-                <div class="fw-bold text-dark">Badan Meteorologi,</div>
-                <div class="text-muted small">Klimatologi, dan Geofisika</div>
-            </div>
-        </div>
-
-    </div>
-</nav>
-
-{{-- ================= CONTENT ================= --}}
-<main class="container my-4">
-
+<main class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
+        <div class="col-lg-9 col-xl-8">
 
-            <div class="card card-step">
+            <div class="card card-survei">
                 <div class="card-body p-4 p-md-5">
 
+                    {{-- HEADER --}}
+                    <div class="card-header-custom d-flex align-items-center gap-3">
+                        <img src="{{ asset('images/logo-bmkg.png') }}" height="46">
+
+                        <div class="lh-sm">
+                            <div class="fw-bold">
+                                Badan Meteorologi, Klimatologi, dan Geofisika
+                            </div>
+                            <div class="text-muted small">
+                                STAMET SSK II PEKANBARU
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- TITLE --}}
                     <div class="mb-4">
-                        <h4 class="step-title mb-2">
+                        <div class="title mb-2">
                             SURVEI KEPUASAN PENGUNJUNG
-                        </h4>
-                        <p class="step-desc mb-0">
+                        </div>
+                        <p class="desc mb-0">
                             Mohon berikan penilaian Anda terhadap pelayanan
-                            yang telah diberikan oleh BMKG.
+                            yang telah diberikan oleh Stasiun Meteorologi.
                         </p>
                     </div>
 
+                    {{-- FORM --}}
                     <form method="POST" action="{{ route('pengunjung.survei.store') }}">
                         @csrf
 
-                        <div class="mb-3">
-                            <label class="form-label">Tingkat Kepuasan Pelayanan</label>
-                            <select name="kepuasan" class="form-select" required>
-                                <option value="">-- Pilih --</option>
-                                <option>Sangat Puas</option>
-                                <option>Puas</option>
-                                <option>Cukup Puas</option>
-                                <option>Tidak Puas</option>
-                            </select>
-                        </div>
+                        {{-- LOOP PERTANYAAN --}}
+                        @php
+                            $questions = [
+                                'Persyaratan pelayanan' => [
+                                    'Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis'
+                                ],
+                                'Kemudahan pelayanan' => [
+                                    'Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah'
+                                ],
+                                'Kecepatan petugas' => [
+                                    'Sangat Cepat', 'Cukup Cepat', 'Kurang Cepat', 'Tidak Cepat'
+                                ],
+                                'Akses informasi Meteorologi Penerbangan' => [
+                                    'Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah'
+                                ],
+                                'Pelayanan informasi website/media sosial' => [
+                                    'Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis'
+                                ],
+                                'Kesesuaian produk pelayanan' => [
+                                    'Sangat Sesuai', 'Cukup Sesuai', 'Kurang Sesuai', 'Tidak Sesuai'
+                                ],
+                                'Kemampuan petugas' => [
+                                    'Sangat Mampu', 'Cukup Mampu', 'Kurang Mampu', 'Tidak Mampu'
+                                ],
+                                'Kesopanan dan perilaku petugas' => [
+                                    'Sangat Sopan/Ramah', 'Cukup Sopan/Ramah', 'Kurang Sopan/Ramah', 'Tidak Sopan/Ramah'
+                                ],
+                                'Sarana dan prasarana' => [
+                                    'Sangat Baik', 'Cukup', 'Kurang Baik', 'Tidak Baik'
+                                ],
+                                'Penanganan pengaduan' => [
+                                    'Dikelola Sangat Baik', 'Dikelola Cukup Baik', 'Kurang Maksimal', 'Tidak Berfungsi'
+                                ],
+                            ];
+                        @endphp
 
-                        <div class="mb-3">
-                            <label class="form-label">Penilaian terhadap Petugas</label>
-                            <select name="pelayanan" class="form-select" required>
-                                <option value="">-- Pilih --</option>
-                                <option>Sangat Baik</option>
-                                <option>Baik</option>
-                                <option>Cukup</option>
-                                <option>Kurang</option>
-                            </select>
-                        </div>
+                        @foreach($questions as $label => $options)
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    Bagaimana pendapat saudara tentang {{ strtolower($label) }}?
+                                </label>
 
-                        <div class="mb-4">
-                            <label class="form-label">Saran atau Masukan</label>
-                            <textarea name="saran"
-                                      rows="4"
-                                      class="form-control"
-                                      placeholder="Tuliskan saran Anda..."
-                                      required></textarea>
-                        </div>
+                                <div class="select-wrapper">
+                                    <select name="survey[]" class="form-select" required>
+                                        <option value="">Pilih jawaban</option>
+                                        @foreach($options as $opt)
+                                            <option value="{{ $opt }}">{{ $opt }}</option>
+                                        @endforeach
+                                    </select>
 
-                        <button type="submit" class="btn btn-next w-100">
-                            KIRIM SURVEI
+                                    {{-- Tailwind-style Chevron Icon --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <button class="btn btn-submit w-100 mt-3">
+                            Kirim
                         </button>
                     </form>
 
@@ -216,45 +215,8 @@
 
         </div>
     </div>
-
 </main>
 
-{{-- ================= POPUP ================= --}}
-@if(session('success'))
-<div class="thankyou-overlay" id="thankYouPopup">
-    <div class="thankyou-card">
-
-        <img src="{{ asset('images/logo-bmkg.png') }}" class="thankyou-logo" alt="BMKG">
-
-        <div class="thankyou-icon">
-            <i class="bi bi-check-circle-fill"></i>
-        </div>
-
-        <h5 class="fw-bold mt-3">Terima Kasih</h5>
-
-        <p class="text-muted mt-2">
-            Terima kasih telah berkunjung dan mengisi
-            survei kepuasan pelayanan di
-            <strong>BMKG</strong>.
-        </p>
-
-        <a href="/" class="btn btn-primary w-100 mt-3">
-            Selesai
-        </a>
-    </div>
-</div>
-@endif
-
-{{-- ================= SCRIPT ================= --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-@if(session('success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('thankYouPopup').style.display = 'flex';
-    });
-</script>
-@endif
-
 </body>
 </html>

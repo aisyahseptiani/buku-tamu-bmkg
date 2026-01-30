@@ -20,14 +20,14 @@ use App\Http\Controllers\Admin\QrController;
 Route::get('/qrs/{token}', [QrPublicController::class, 'show'])
     ->name('qr.public');
 
-// form pengunjung (HANYA BISA DIAKSES SETELAH SCAN QR)
+// STEP 1 – FORM PENGUNJUNG
 Route::get('/pengunjung', [PengunjungController::class, 'step1'])
     ->name('pengunjung.step1');
 
 Route::post('/pengunjung', [PengunjungController::class, 'postStep1'])
     ->name('pengunjung.step1.post');
 
-// survei
+// SURVEI
 Route::get('/survei', [PengunjungController::class, 'survei'])
     ->name('pengunjung.survei');
 
@@ -50,7 +50,7 @@ Route::post('/admin/login', [AuthController::class, 'authenticate'])
 
 /*
 |--------------------------------------------------------------------------
-| AREA ADMIN (LOGIN WAJIB)
+| AREA ADMIN
 |--------------------------------------------------------------------------
 */
 
@@ -75,16 +75,10 @@ Route::middleware('auth.admin')->prefix('admin')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| TEST PDF (OPSIONAL)
+| TESTING / PREVIEW (LOCAL ONLY)
 |--------------------------------------------------------------------------
 */
 
-Route::get('/test-pdf', function () {
-    return Pdf::loadHTML('<h1>PDF BERHASIL</h1>')
-        ->download('test.pdf');
-});
-
-//testing preview
 Route::get('/preview-step1', function () {
     session(['qr_token' => 'TEST']);
     return redirect()->route('pengunjung.step1');
