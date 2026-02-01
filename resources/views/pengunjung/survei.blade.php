@@ -205,6 +205,47 @@
                             </div>
                         @endforeach
 
+
+                        {{-- SARAN --}}
+                        <div class="mb-4">
+                            <label class="form-label">
+                                Saran
+                            </label>
+
+                            <textarea
+                                name="saran"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Tuliskan saran Anda..."
+                                style="
+                                    border-radius: 14px;
+                                    font-size: 0.9rem;
+                                    padding: 14px 16px;
+                                    border: 2px solid #e5e7eb;
+                                "
+                            ></textarea>
+                        </div>
+
+                        {{-- MASUKAN --}}
+                        <div class="mb-4">
+                            <label class="form-label">
+                                Masukan
+                            </label>
+
+                            <textarea
+                                name="masukan"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Tuliskan masukan Anda..."
+                                style="
+                                    border-radius: 14px;
+                                    font-size: 0.9rem;
+                                    padding: 14px 16px;
+                                    border: 2px solid #e5e7eb;
+                                "
+                            ></textarea>
+                        </div>
+
                         <button class="btn btn-submit w-100 mt-3">
                             Kirim
                         </button>

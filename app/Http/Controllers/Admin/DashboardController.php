@@ -102,7 +102,19 @@ class DashboardController extends Controller
             'total',
             'grafik'
         ));
-    }
+
+        //liat survei
+        $mode = $request->get('mode', 'pengunjung');
+
+        if ($mode === 'survei') {
+            $surveis = PengunjungSurvei::with('detail')->latest()->get();
+            return view('admin.dashboard', compact('mode', 'surveis'));
+        }
+
+        // default: data pengunjung
+        $pengunjung = Pengunjung::latest()->get();
+        return view('admin.dashboard', compact('mode', 'pengunjung'));
+        }
 
     /*
     ======================

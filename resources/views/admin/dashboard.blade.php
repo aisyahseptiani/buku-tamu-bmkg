@@ -6,6 +6,7 @@
 @php
     use Carbon\Carbon;
     $today = Carbon::now()->translatedFormat('l, d F Y');
+    $mode  = request('mode', 'pengunjung'); // ⬅️ MODE TAMBAHAN
 @endphp
 
 {{-- ================= HEADER ================= --}}
@@ -14,15 +15,27 @@
     <div class="text-muted">{{ $today }}</div>
 </div>
 
+{{-- ================= PILIH MODE ================= --}}
+<div class="mb-3">
+    <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode' => 'pengunjung'])) }}"
+       class="btn btn-outline-primary {{ $mode === 'pengunjung' ? 'active' : '' }}">
+        Data Pengunjung
+    </a>
+
+    <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode' => 'survei'])) }}"
+       class="btn btn-outline-success {{ $mode === 'survei' ? 'active' : '' }}">
+        Data Survei
+    </a>
+</div>
+
 {{-- ================= FILTER ================= --}}
 <div class="card shadow-sm mb-4">
     <div class="card-body py-3">
         <form method="GET">
+            <input type="hidden" name="mode" value="{{ $mode }}"> {{-- ⬅️ JAGA MODE --}}
 
-            {{-- ROW UTAMA --}}
             <div class="row g-3 align-items-end">
 
-                {{-- JENIS FILTER --}}
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold mb-1">Jenis Filter</label>
                     <select name="filter" class="form-select form-select-sm">
@@ -33,30 +46,17 @@
                     </select>
                 </div>
 
-                {{-- RENTANG TANGGAL --}}
                 @if(request('filter') !== 'hari')
                 <div class="col-md-5">
-                    <label class="form-label small fw-semibold mb-1 d-flex align-items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                             class="me-1">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/>
-                        </svg>
-                        Rentang Tanggal
-                    </label>
-
+                    <label class="form-label small fw-semibold mb-1">Rentang Tanggal</label>
                     <div class="input-group input-group-sm">
-                        <input type="date" name="from" class="form-control"
-                               value="{{ request('from') }}">
-                        <span class="input-group-text bg-white">—</span>
-                        <input type="date" name="to" class="form-control"
-                               value="{{ request('to') }}">
+                        <input type="date" name="from" class="form-control" value="{{ request('from') }}">
+                        <span class="input-group-text">—</span>
+                        <input type="date" name="to" class="form-control" value="{{ request('to') }}">
                     </div>
                 </div>
                 @endif
 
-                {{-- BUTTON --}}
                 <div class="col-md-2">
                     <button class="btn btn-primary btn-sm w-100 fw-semibold">
                         Tampilkan
@@ -64,40 +64,35 @@
                 </div>
 
             </div>
-
         </form>
     </div>
 </div>
 
-
-{{-- ================= SWITCH & DOWNLOAD ================= --}}
+{{-- ================= SWITCH TABEL / GRAFIK ================= --}}
+@if($mode === 'pengunjung')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="btn-group btn-group-sm">
-        <button type="button"
-                class="btn btn-outline-primary active"
-                id="btnTabel"
-                onclick="showTabel()">
+        <button type="button" class="btn btn-outline-primary active" id="btnTabel" onclick="showTabel()">
             Tabel
         </button>
-        <button type="button"
-                class="btn btn-outline-primary"
-                id="btnGrafik"
-                onclick="showGrafik()">
+        <button type="button" class="btn btn-outline-primary" id="btnGrafik" onclick="showGrafik()">
             Grafik
         </button>
     </div>
-
-    
 </div>
+@endif
 
 {{-- ================= TABEL ================= --}}
 <div class="card shadow-sm mb-4" id="sectionTabel">
     <div class="card-body">
+
+        {{-- ================= DATA PENGUNJUNG (LAMA, UTUH) ================= --}}
+        @if($mode === 'pengunjung')
+
         <h5 class="mb-3">Data Pengunjung</h5>
 
-        {{-- ===== TAHUNAN ===== --}}
         @if($filter === 'tahun')
-            <table class="table table-bordered ">
+            <table class="table table-bordered">
                 <thead class="table-light">
                     <tr>
                         <th>Bulan</th>
@@ -117,8 +112,6 @@
                     </tr>
                 </tbody>
             </table>
-
-        {{-- ===== HARI / RANGE ===== --}}
         @else
             <div class="table-responsive">
                 <table class="table table-bordered align-middle">
@@ -144,26 +137,83 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">
-                                    Tidak ada data
-                                </td>
+                                <td colspan="6" class="text-center text-muted">Tidak ada data</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         @endif
+
+        @endif
+
+        {{-- ================= DATA SURVEI (TAMBAHAN) ================= --}}
+        @if($mode === 'survei')
+
+        <h5 class="mb-3">Data Survei Kepuasan Pengunjung</h5>
+
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>Waktu</th>
+                    <th>Saran</th>
+                    <th>Masukan</th>
+                    <th>Detail Jawaban</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($surveis as $s)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $s->created_at->translatedFormat('d F Y H:i') }}</td>
+                        <td>{{ $s->saran ?? '-' }}</td>
+                        <td>{{ $s->masukan ?? '-' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#detail{{ $s->id }}">
+                                Lihat
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr class="collapse" id="detail{{ $s->id }}">
+                        <td colspan="5">
+                            <ul class="mb-0">
+                                @foreach($s->detail as $d)
+                                    <li>
+                                        <strong>{{ $d->pertanyaan }}:</strong>
+                                        {{ $d->jawaban }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            Tidak ada data survei
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        @endif
+
     </div>
 </div>
 
 <div class="d-flex justify-content-end mt-3">
     <a href="{{ route('admin.dashboard.exportPdf', request()->query()) }}"
        class="btn btn-danger">
-         Download PDF
+        Download PDF
     </a>
 </div>
 
-{{-- ================= GRAFIK ================= --}}
+{{-- ================= GRAFIK (PENGUNJUNG SAJA) ================= --}}
+@if($mode === 'pengunjung')
 <div class="card shadow-sm d-none" id="sectionGrafik">
     <div class="card-body">
         <h5 class="mb-3">Grafik Pengunjung</h5>
@@ -172,11 +222,14 @@
         </div>
     </div>
 </div>
+@endif
+
 @endsection
 
 @push('script')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+@if($mode === 'pengunjung')
 <script>
 const labels = {!! json_encode($grafik->pluck('label')) !!};
 const data   = {!! json_encode($grafik->pluck('total')) !!};
@@ -195,39 +248,27 @@ const chart = new Chart(document.getElementById('grafikPengunjung'), {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0,     // ⬅️ TANPA DESIMAL
-                    stepSize: 1       // ⬅️ BILANGAN BULAT
-                }
-            },
-            x: {
-                grid: { display: false }
-            }
+            y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+            x: { grid: { display: false } }
         }
     }
 });
 
-// ================= SWITCH =================
 function showTabel() {
-    document.getElementById('sectionTabel').classList.remove('d-none');
-    document.getElementById('sectionGrafik').classList.add('d-none');
-
+    sectionTabel.classList.remove('d-none');
+    sectionGrafik.classList.add('d-none');
     btnTabel.classList.add('active');
     btnGrafik.classList.remove('active');
 }
 
 function showGrafik() {
-    document.getElementById('sectionGrafik').classList.remove('d-none');
-    document.getElementById('sectionTabel').classList.add('d-none');
-
+    sectionGrafik.classList.remove('d-none');
+    sectionTabel.classList.add('d-none');
     btnGrafik.classList.add('active');
     btnTabel.classList.remove('active');
 }
 </script>
+@endif
 @endpush
