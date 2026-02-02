@@ -50,8 +50,8 @@ class DashboardController extends Controller
                 ->get();
 
             $rekapSurvei = Survei::whereBetween('created_at', [$from, $to])
-                ->selectRaw('kepuasan, COUNT(*) as total')
-                ->groupBy('kepuasan')
+                ->selectRaw('jawaban, COUNT(*) as total')
+                ->groupBy('jawaban')
                 ->get();
 
             $totalSurvei = $rekapSurvei->sum('total');
