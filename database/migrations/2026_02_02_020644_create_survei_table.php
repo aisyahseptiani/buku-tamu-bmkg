@@ -16,16 +16,13 @@ return new class extends Migration
 
             // relasi ke pengunjung (opsional tapi direkomendasikan)
             $table->foreignId('pengunjung_id')
-                  ->nullable()
-                  ->constrained('pengunjungs')
-                  ->nullOnDelete();
+                  ->constrained()
+                  ->cascadeOnDelete();
 
-            // jawaban survei
-            $table->string('kepuasan');
-            $table->string('pelayanan');
-            $table->string('fasilitas')->nullable();
+            // jawaban survei (JSON)
+            $table->json('jawaban');
 
-            // masukan & saran (2 kotak)
+            //saran&masukan
             $table->text('saran')->nullable();
             $table->text('masukan')->nullable();
 

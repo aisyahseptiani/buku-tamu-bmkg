@@ -224,4 +224,31 @@ class DashboardController extends Controller
             'masukan'
         ));
     }
+
+    public function postStep1(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:255',
+            'instansi' => 'nullable|string|max:255',
+            'tujuan'   => 'required|string|max:255',
+            'no_hp'    => 'nullable|string|max:20',
+        ]);
+
+        // SIMPAN KE DATABASE (INI YANG SEBELUMNYA TIDAK ADA)
+        $pengunjung = Pengunjung::create([
+            'nama'       => $request->nama,
+            'instansi'   => $request->instansi,
+            'tujuan'     => $request->tujuan,
+            'no_hp'      => $request->no_hp,
+            'ip_address' => $request->ip(),
+        ]);
+
+        // SIMPAN ID KE SESSION
+        session([
+            'pengunjung_id' => $pengunjung->id
+        ]);
+
+        return redirect()->route('pengunjung.survei');
+    }
+
 }

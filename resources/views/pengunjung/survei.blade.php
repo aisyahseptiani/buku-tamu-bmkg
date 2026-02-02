@@ -189,14 +189,13 @@
                                 </label>
 
                                 <div class="select-wrapper">
-                                    <select name="survey[]" class="form-select" required>
+                                    <select name="jawaban[]" class="form-select" required>
                                         <option value="">Pilih jawaban</option>
                                         @foreach($options as $opt)
                                             <option value="{{ $opt }}">{{ $opt }}</option>
                                         @endforeach
                                     </select>
 
-                                    {{-- Tailwind-style Chevron Icon --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />

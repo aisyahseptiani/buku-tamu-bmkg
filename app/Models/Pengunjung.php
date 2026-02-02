@@ -16,21 +16,11 @@ class Pengunjung extends Model
         'instansi',
         'tujuan',
         'no_hp',
-        'foto',
-        'tanda_tangan',
         'ip_address',
-        'lokasi',
-        'tanggal_kunjungan',
     ];
 
-    public function index()
+    public function survei()
     {
-        Pengunjung::create([
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'created_at' => now(),
-        ]);
-
-        return view('user.home');
+        return $this->hasOne(Survei::class);
     }
 }
