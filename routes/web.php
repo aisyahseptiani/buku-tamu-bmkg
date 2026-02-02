@@ -34,6 +34,10 @@ Route::get('/survei', [PengunjungController::class, 'survei'])
 Route::post('/survei', [PengunjungController::class, 'storeSurvei'])
     ->name('pengunjung.survei.store');
 
+Route::post('/survei/store', [PengunjungController::class, 'storeSurvei'])
+    ->name('pengunjung.survei.store');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -88,3 +92,9 @@ Route::get('/preview-survei', function () {
     session(['pengunjung' => ['nama' => 'Test']]);
     return redirect()->route('pengunjung.survei');
 });
+
+
+//laporan survei
+Route::get('/admin/laporan-survei', 
+    [DashboardController::class, 'laporanSurvei']
+)->middleware('auth')->name('admin.laporan-survei');

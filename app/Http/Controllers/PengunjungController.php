@@ -31,7 +31,7 @@ class PengunjungController extends Controller
 
     /**
      * ============================
-     * SIMPAN STEP 1 (SESSION)
+     * SIMPAN STEP 1 KE SESSION
      * ============================
      */
     public function postStep1(Request $request)
@@ -68,7 +68,8 @@ class PengunjungController extends Controller
      * HALAMAN SURVEI
      * ============================
      */
-    public function survei(Request $request) {
+    public function survei(Request $request)
+    {
         if (
             !(app()->environment('local') && $request->query('preview')) &&
             !session()->has('pengunjung')
@@ -81,69 +82,52 @@ class PengunjungController extends Controller
 
     /**
      * ============================
-     * SUBMIT FINAL
+     * SUBMIT FINAL (SIMPAN DB)
      * ============================
      */
-    public function submit(Request $request)
+    public function storeSurvei(Request $request)
     {
-        if (!session()->has('pengunjung') || !session()->has('qr_token')) {
-            abort(403);
+        if (!session()->has('pengunjung')) {
+        abort(403, 'Session pengunjung tidak ditemukan');
         }
 
         $request->validate([
             'kepuasan'  => 'required',
             'pelayanan' => 'required',
-            'saran'     => 'required|string',
+            'fasilitas' => 'required',
+            'saran'     => 'nullable|string',
+            'masukan'   => 'nullable|string',
         ]);
 
-        $data = session('pengunjung');
+        DB::transaction(function () use ($request) {
 
-        Pengunjung::create([
-            'nama'              => $data['nama'],
-            'instansi'          => $data['instansi'] ?? null,
-            'tujuan'            => $data['tujuan'],
-            'no_hp'             => $data['no_hp'] ?? null,
-            'ip_address'        => $request->ip(),
-            'tanggal_kunjungan' => Carbon::now()->toDateString(),
-        ]);
+            $data = session('pengunjung');
 
-        // 1 QR = 1 pengunjung
-        session()->forget([
-            'pengunjung',
-            'qr_token'
-        ]);
+            // simpan pengunjung
+            $pengunjung = Pengunjung::create([
+                'nama'              => $data['nama'],
+                'instansi'          => $data['instansi'] ?? null,
+                'tujuan'            => $data['tujuan'],
+                'no_hp'             => $data['no_hp'] ?? null,
+                'ip_address'        => request()->ip(),
+                'tanggal_kunjungan' => now()->toDateString(),
+            ]);
+
+            // simpan survei
+            Survei::create([
+                'pengunjung_id' => $pengunjung->id,
+                'kepuasan'      => $request->kepuasan,
+                'pelayanan'     => $request->pelayanan,
+                'fasilitas'     => $request->fasilitas,
+                'saran'         => $request->saran,
+                'masukan'       => $request->masukan,
+            ]);
+        });
+
+        session()->forget(['pengunjung', 'qr_token']);
 
         return redirect()
             ->route('pengunjung.step1')
-            ->with('success', 'Terima kasih, data berhasil dikirim.');
-    }
-
-    public function storeSurvei(Request $request) {
-        if (!session()->has('pengunjung')) {
-        abort(403);
-    }
-
-    $request->validate([
-        'kepuasan'  => 'required',
-        'pelayanan' => 'required',
-        'saran'     => 'required|string',
-    ]);
-
-    $data = session('pengunjung');
-
-    Pengunjung::create([
-        'nama'              => $data['nama'],
-        'instansi'          => $data['instansi'] ?? null,
-        'tujuan'            => $data['tujuan'],
-        'no_hp'             => $data['no_hp'] ?? null,
-        'ip_address'        => $request->ip(),
-        'tanggal_kunjungan' => Carbon::now()->toDateString(),
-    ]);
-
-    session()->forget(['pengunjung', 'qr_token']);
-
-    return redirect()
-        ->route('pengunjung.step1')
-        ->with('success', 'Terima kasih, data berhasil dikirim.');
+            ->with('success', 'Terima kasih atas surveinya');
     }
 }

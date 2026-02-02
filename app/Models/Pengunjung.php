@@ -20,5 +20,17 @@ class Pengunjung extends Model
         'tanda_tangan',
         'ip_address',
         'lokasi',
+        'tanggal_kunjungan',
     ];
+
+    public function index()
+    {
+        Pengunjung::create([
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return view('user.home');
+    }
 }

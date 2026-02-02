@@ -150,7 +150,64 @@
         {{-- ================= DATA SURVEI (TAMBAHAN) ================= --}}
         @if($mode === 'survei')
 
-        <h5 class="mb-3">Data Survei Kepuasan Pengunjung</h5>
+        {{-- ================= REKAP SURVEI ================= --}}
+        @if(isset($rekapSurvei))
+        <hr class="my-4">
+
+        <h5 class="mb-4 fw-bold">
+            Rekapitulasi Hasil Survei Kepuasan
+        </h5>
+
+        <div class="row">
+        @foreach($rekapSurvei as $item)
+            @php
+                $totalResponden = array_sum($item['data']);
+            @endphp
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+
+                        <h6 class="fw-semibold mb-3">
+                            {{ $item['label'] }}
+                        </h6>
+
+                        @foreach($item['data'] as $opsi => $jumlah)
+                            @php
+                                $persen = $totalResponden > 0
+                                    ? round(($jumlah / $totalResponden) * 100)
+                                    : 0;
+                            @endphp
+
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between small">
+                                    <span>{{ $opsi }}</span>
+                                    <span class="fw-semibold">
+                                        {{ $jumlah }} ({{ $persen }}%)
+                                    </span>
+                                </div>
+
+                                <div class="progress" style="height:6px">
+                                    <div class="progress-bar bg-primary"
+                                        style="width: {{ $persen }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                        <div class="text-muted small mt-2">
+                            Total responden: {{ $totalResponden }}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        @endforeach
+        </div>
+        @endif
+
+
+        <!-- <h5 class="mb-3">Data Survei Kepuasan Pengunjung</h5>
 
         <table class="table table-bordered align-middle">
             <thead class="table-light">
@@ -198,7 +255,7 @@
                     </tr>
                 @endforelse
             </tbody>
-        </table>
+        </table> -->
 
         @endif
 
