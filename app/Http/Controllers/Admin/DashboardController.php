@@ -10,7 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
-
 class DashboardController extends Controller
 {
     public function index(Request $request)
@@ -18,16 +17,14 @@ class DashboardController extends Controller
         $mode   = $request->get('mode', 'pengunjung');
         $filter = $request->filter ?? 'hari';
 
-        /*
-        ======================
-        DEFAULT VARIABLE
-        ======================
-        */
+        // ======================
+        // DEFAULT VARIABLE
+        // ======================
         $grafik       = collect();
         $pengunjungs  = collect();
         $rekapBulanan = collect();
         $surveis      = collect();
-        $rekapSurvei  = 0;
+        $rekapSurvei  = [];
         $total        = 0;
 
         /*
@@ -45,23 +42,38 @@ class DashboardController extends Controller
                 ? Carbon::parse($request->to)->endOfDay()
                 : now()->endOfMonth();
 
-            $surveis = Survei::whereBetween('created_at', [$from, $to])
-                ->latest()
-                ->get();
+            $surveis = Survei::whereBetween('created_at', [$from, $to])->get();
+            $config  = config('survei');
 
-            $rekapSurvei = Survei::whereBetween('created_at', [$from, $to])
-                ->selectRaw('jawaban, COUNT(*) as total')
-                ->groupBy('jawaban')
-                ->get();
+            foreach ($config as $field => $item) {
 
-            $totalSurvei = $rekapSurvei->sum('total');
+                $opsiData = [];
+
+                foreach ($item['opsi'] as $value => $label) {
+
+                    $jumlah = $surveis->filter(function ($row) use ($field, $value) {
+                        return isset($row->jawaban[$field]) &&
+                               $row->jawaban[$field] == $value;
+                    })->count();
+
+                    $opsiData[] = [
+                        'label' => $label,
+                        'total' => $jumlah,
+                    ];
+                }
+
+                $rekapSurvei[] = [
+                    'pertanyaan' => $item['label'],
+                    'opsi'       => $opsiData,
+                    'total'      => collect($opsiData)->sum('total'),
+                ];
+            }
 
             return view('admin.dashboard', compact(
                 'mode',
                 'filter',
                 'surveis',
-                'rekapSurvei',
-                'totalSurvei'
+                'rekapSurvei'
             ));
         }
 
@@ -109,10 +121,7 @@ class DashboardController extends Controller
                 ? Carbon::parse($request->to)->endOfDay()
                 : now()->endOfMonth();
 
-            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])
-                ->latest()
-                ->get();
-
+            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
             $total = $pengunjungs->count();
 
             $rawGrafik = Pengunjung::whereBetween('created_at', [$from, $to])
@@ -188,67 +197,4 @@ class DashboardController extends Controller
             '.pdf'
         );
     }
-
-    public function laporanSurvei()
-    {
-        $config = config('survei');
-        $rekap  = [];
-
-        foreach ($config as $field => $item) {
-
-            $data = [];
-
-            foreach ($item['opsi'] as $value => $label) {
-                $data[$label] = Survei::where($field, $value)->count();
-            }
-
-            $rekap[] = [
-                'label' => $item['label'],
-                'data'  => $data,
-            ];
-        }
-
-        $saran = Survei::whereNotNull('saran')
-            ->where('saran', '!=', '')
-            ->latest()
-            ->pluck('saran');
-
-        $masukan = Survei::whereNotNull('masukan')
-            ->where('masukan', '!=', '')
-            ->latest()
-            ->pluck('masukan');
-
-        return view('admin.laporan-survei', compact(
-            'rekap',
-            'saran',
-            'masukan'
-        ));
-    }
-
-    public function postStep1(Request $request)
-    {
-        $request->validate([
-            'nama'     => 'required|string|max:255',
-            'instansi' => 'nullable|string|max:255',
-            'tujuan'   => 'required|string|max:255',
-            'no_hp'    => 'nullable|string|max:20',
-        ]);
-
-        // SIMPAN KE DATABASE (INI YANG SEBELUMNYA TIDAK ADA)
-        $pengunjung = Pengunjung::create([
-            'nama'       => $request->nama,
-            'instansi'   => $request->instansi,
-            'tujuan'     => $request->tujuan,
-            'no_hp'      => $request->no_hp,
-            'ip_address' => $request->ip(),
-        ]);
-
-        // SIMPAN ID KE SESSION
-        session([
-            'pengunjung_id' => $pengunjung->id
-        ]);
-
-        return redirect()->route('pengunjung.survei');
-    }
-
 }

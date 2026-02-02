@@ -7,6 +7,7 @@
     use Carbon\Carbon;
     $today = Carbon::now()->translatedFormat('l, d F Y');
     $mode  = request('mode', 'pengunjung');
+    $filter = request('filter');
 @endphp
 
 {{-- ================= HEADER ================= --}}
@@ -38,14 +39,14 @@
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold">Jenis Filter</label>
                     <select name="filter" class="form-select form-select-sm">
-                        <option value="hari" {{ request('filter')=='hari'?'selected':'' }}>Hari Ini</option>
-                        <option value="minggu" {{ request('filter')=='minggu'?'selected':'' }}>Mingguan</option>
-                        <option value="bulan" {{ request('filter')=='bulan'?'selected':'' }}>Bulanan</option>
-                        <option value="tahun" {{ request('filter')=='tahun'?'selected':'' }}>Tahunan</option>
+                        <option value="hari" {{ $filter=='hari'?'selected':'' }}>Hari Ini</option>
+                        <option value="minggu" {{ $filter=='minggu'?'selected':'' }}>Mingguan</option>
+                        <option value="bulan" {{ $filter=='bulan'?'selected':'' }}>Bulanan</option>
+                        <option value="tahun" {{ $filter=='tahun'?'selected':'' }}>Tahunan</option>
                     </select>
                 </div>
 
-                @if(request('filter') !== 'hari')
+                @if($filter !== 'hari')
                 <div class="col-md-5">
                     <label class="form-label small fw-semibold">Rentang Tanggal</label>
                     <div class="input-group input-group-sm">
@@ -66,12 +67,12 @@
     </div>
 </div>
 
-{{-- ================= SWITCH TABEL / GRAFIK ================= --}}
+{{-- ================= SWITCH ================= --}}
 @if($mode === 'pengunjung')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="btn-group btn-group-sm">
-        <button class="btn btn-outline-primary active" id="btnTabel" onclick="showTabel()">Tabel</button>
-        <button class="btn btn-outline-primary" id="btnGrafik" onclick="showGrafik()">Grafik</button>
+        <button class="btn btn-outline-primary active" onclick="showTabel()">Tabel</button>
+        <button class="btn btn-outline-primary" onclick="showGrafik()">Grafik</button>
     </div>
 </div>
 @endif
@@ -141,50 +142,43 @@
 @endif
 
 {{-- ================= DATA SURVEI ================= --}}
-@if($mode === 'survei')
+@if($mode === 'survei' && isset($rekapSurvei) && count($rekapSurvei) > 0)
 
-@if(isset($rekapSurvei) && $rekapSurvei->count())
 <hr class="my-4">
-
 <h5 class="mb-4 fw-bold">Rekapitulasi Hasil Survei Kepuasan</h5>
 
-@php $totalResponden = $rekapSurvei->sum('total'); @endphp
-
 <div class="row">
-@foreach($rekapSurvei as $item)
-@php
-    $persen = $totalResponden > 0
-        ? round(($item->total / $totalResponden) * 100, 1)
-        : 0;
-@endphp
-
-<div class="col-md-3 mb-4">
-    <div class="card shadow-sm h-100 text-center">
+@foreach($rekapSurvei as $soal)
+<div class="col-md-6 mb-4">
+    <div class="card shadow-sm h-100">
         <div class="card-body">
-            <h6 class="fw-semibold">
-                {{ is_array($item->jawaban) ? implode(', ', $item->jawaban) : $item->jawaban }}
-            </h6>
-            <div class="fs-4 fw-bold">{{ $item->total }}</div>
-            <small class="text-muted">{{ $persen }}%</small>
+            <h6 class="fw-bold mb-3">{{ $soal['pertanyaan'] }}</h6>
 
-            <div class="progress mt-2" style="height:6px">
-                <div class="progress-bar bg-success" style="width:{{ $persen }}%"></div>
-            </div>
+            @foreach($soal['opsi'] as $opsi)
+                @php
+                    $persen = $soal['total'] > 0
+                        ? round(($opsi['total'] / $soal['total']) * 100, 1)
+                        : 0;
+                @endphp
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small">
+                        <span>{{ $opsi['label'] }}</span>
+                        <span>{{ $opsi['total'] }}</span>
+                    </div>
+                    <div class="progress" style="height:6px">
+                        <div class="progress-bar bg-success" style="width:{{ $persen }}%"></div>
+                    </div>
+                </div>
+            @endforeach
+
+            <small class="text-muted">
+                Total responden: {{ $soal['total'] }}
+            </small>
         </div>
     </div>
 </div>
 @endforeach
-</div>
-
-<div class="text-muted small mt-2">
-    Total responden: {{ $totalResponden }}
-</div>
-@else
-<p class="text-muted">Belum ada data survei.</p>
-@endif
-@endif
-
-    </div>
 </div>
 
 <div class="d-flex justify-content-end mt-3">
@@ -193,14 +187,16 @@
     </a>
 </div>
 
+@endif
+</div>
+</div>
+
 {{-- ================= GRAFIK ================= --}}
 @if($mode === 'pengunjung')
 <div class="card shadow-sm d-none" id="sectionGrafik">
     <div class="card-body">
         <h5 class="mb-3">Grafik Pengunjung</h5>
-        <div style="height:360px">
-            <canvas id="grafikPengunjung"></canvas>
-        </div>
+        <canvas id="grafikPengunjung"></canvas>
     </div>
 </div>
 @endif
@@ -212,15 +208,6 @@
 
 @if($mode === 'pengunjung')
 <script>
-const labels = {!! json_encode($grafik->pluck('label')) !!};
-const data   = {!! json_encode($grafik->pluck('total')) !!};
-
-new Chart(document.getElementById('grafikPengunjung'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor:'#4e73df', borderRadius:6 }] },
-    options: { responsive:true, plugins:{legend:{display:false}} }
-});
-
 function showTabel(){
     sectionTabel.classList.remove('d-none');
     sectionGrafik.classList.add('d-none');
