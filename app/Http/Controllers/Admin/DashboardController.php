@@ -32,6 +32,19 @@ class DashboardController extends Controller
             $from = now()->startOfYear();
             $to   = now()->endOfYear();
         }
+        /*
+        ======================
+        TEKS PERIODE
+        ======================
+        */
+        if ($filter === 'hari') {
+            $periodeText = $from->translatedFormat('l, d F Y');
+        } elseif ($filter === 'bulan') {
+            $periodeText = $from->translatedFormat('F Y');
+        } else {
+            $periodeText = 'Tahun ' . $from->translatedFormat('Y');
+        }
+
 
         /*
         ======================
@@ -83,7 +96,8 @@ class DashboardController extends Controller
                 'filter',
                 'rekapSurvei',
                 'totalResponden',
-                'grafik' // tetap dikirim agar blade aman
+                'grafik',
+                'periodeText' 
             ));
         }
 
@@ -140,7 +154,8 @@ class DashboardController extends Controller
             'filter',
             'pengunjungs',
             'grafik',
-            'total'
+            'total',
+            'periodeText'
         ));
     }
 

@@ -116,7 +116,13 @@
 
 @if($mode === 'pengunjung')
 
-<h5 class="mb-3">Data Pengunjung</h5>
+<!-- tampilkan periode -->
+<div class="d-flex align-items-center mb-2">
+    <span class="text-muted">
+        <strong>Data Pengunjung Periode : {{ $periodeText }}</strong>
+    </span>
+</div>
+
 
 @if($filter === 'tahun')
 <table class="table table-bordered">
@@ -223,7 +229,15 @@
 @if($mode === 'pengunjung')
 <div class="card shadow-sm d-none" id="sectionGrafik">
     <div class="card-body" style="height:380px">
-        <h5 class="mb-3">Grafik Pengunjung</h5>
+
+        {{-- HEADER GRAFIK + PERIODE --}}
+        <div class="d-flex align-items-center mb-2">
+            <span class="text-muted">
+                <strong> Data Pengunjung Periode : {{ $periodeText }}</strong>
+            </span>
+        </div>
+
+
         <canvas id="grafikPengunjung"></canvas>
     </div>
 </div>
