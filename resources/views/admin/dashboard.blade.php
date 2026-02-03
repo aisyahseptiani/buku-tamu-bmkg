@@ -188,42 +188,89 @@
 
 {{-- ================= DATA SURVEI ================= --}}
 @if($mode === 'survei' && !empty($rekapSurvei))
+
 <hr class="my-4">
-<h5 class="mb-4 fw-bold">Rekapitulasi Hasil Survei</h5>
 
-<div class="row">
-@foreach($rekapSurvei as $soal)
-<div class="col-md-6 mb-4">
-    <div class="card shadow-sm h-100">
-        <div class="card-body">
-            <h6 class="fw-bold mb-3">{{ $soal['pertanyaan'] }}</h6>
+<div class="d-flex align-items-center mb-3">
+    <span class="text-muted">
+        <strong>Rekapitulasi Survei Periode : {{ $periodeText }}</strong>
+    </span>
+</div>
 
-            @foreach($soal['opsi'] as $opsi)
-            <div class="mb-2">
-                <div class="d-flex justify-content-between small">
-                    <span>{{ $opsi['label'] }}</span>
-                    <span>{{ $opsi['total'] }}</span>
+<div class="row g-4">
+@foreach($rekapSurvei as $index => $soal)
+<div class="col-md-6">
+    <div class="card shadow-sm h-100 border-0">
+        <div class="card-body py-3">
+
+            {{-- HEADER PERTANYAAN --}}
+            <div class="d-flex align-items-start mb-3">
+                <div class="me-2 text-success fs-5">
+                    <i class="bi bi-chat-square-text"></i>
                 </div>
-                <div class="progress" style="height:6px">
-                    <div class="progress-bar bg-success"
-                         style="width:{{ $totalResponden ? ($opsi['total']/$totalResponden)*100 : 0 }}%">
+                <h6 class="fw-bold mb-0">
+                    {{ $soal['pertanyaan'] }}
+                </h6>
+            </div>
+
+            {{-- OPSI JAWABAN --}}
+            @foreach($soal['opsi'] as $opsi)
+            @php
+                $percent = $totalResponden
+                    ? round(($opsi['total'] / $totalResponden) * 100)
+                    : 0;
+
+                $isTop = $percent >= 50;
+            @endphp
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>
+                        {{ $opsi['label'] }}
+                        @if($isTop)
+                            <span class="badge bg-success ms-1">
+                                Terbanyak
+                            </span>
+                        @endif
+                    </span>
+                    <span class="fw-semibold">
+                        {{ $percent }}%
+                    </span>
+                </div>
+
+                <div class="progress" style="height:8px">
+                    <div class="progress-bar
+                        {{ $isTop ? 'bg-success' : 'bg-secondary' }}"
+                        style="width:{{ $percent }}%">
                     </div>
                 </div>
             </div>
             @endforeach
+
         </div>
     </div>
 </div>
 @endforeach
 </div>
 
-<div class="alert alert-info text-center">
-    <strong>Total Responden:</strong> {{ $totalResponden }}
-</div>
-@endif
+<div class="mt-4">
+    <div class="bg-success bg-opacity-10 text-success px-4 py-3 rounded-top
+                border-top border-3 border-success
+                d-flex justify-content-between align-items-center">
+
+        <span>
+            <i class="bi bi-people-fill me-1"></i>
+            Total Responden
+        </span>
+
+        <span class="fw-bold fs-5">
+            {{ $totalResponden }}
+        </span>
 
     </div>
 </div>
+@endif
+
 
 {{-- ================= GRAFIK ================= --}}
 @if($mode === 'pengunjung')
