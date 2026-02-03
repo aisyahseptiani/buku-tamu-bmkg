@@ -109,46 +109,6 @@ class DashboardController extends Controller
         $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
         $total = $pengunjungs->count();
 
-        /*
-        ======================
-        DATA GRAFIK
-        ======================
-        */
-        if ($filter === 'tahun') {
-
-            // Grafik per BULAN
-            $raw = Pengunjung::selectRaw('MONTH(created_at) bulan, COUNT(*) total')
-                ->whereBetween('created_at', [$from, $to])
-                ->groupBy('bulan')
-                ->pluck('total', 'bulan');
-
-            for ($i = 1; $i <= 12; $i++) {
-                $grafik->push([
-                    'label' => Carbon::create()->month($i)->translatedFormat('F'),
-                    'total' => $raw[$i] ?? 0
-                ]);
-            }
-
-        } else {
-
-            // Grafik per HARI
-            $raw = Pengunjung::selectRaw('DATE(created_at) tanggal, COUNT(*) total')
-                ->whereBetween('created_at', [$from, $to])
-                ->groupBy('tanggal')
-                ->pluck('total', 'tanggal');
-
-            $periode = CarbonPeriod::create($from, $to);
-
-            foreach ($periode as $date) {
-                $tgl = $date->toDateString();
-
-                $grafik->push([
-                    'label' => $date->translatedFormat('d M'),
-                    'total' => $raw[$tgl] ?? 0
-                ]);
-            }
-        }
-
         return view('admin.dashboard', compact(
             'mode',
             'filter',

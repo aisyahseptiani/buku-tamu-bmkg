@@ -99,17 +99,6 @@
     </div>
 </div>
 
-
-{{-- ================= SWITCH ================= --}}
-@if($mode === 'pengunjung')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="btn-group btn-group-sm">
-        <button class="btn btn-outline-primary active" onclick="showTabel()">Tabel</button>
-        <button class="btn btn-outline-primary" onclick="showGrafik()">Grafik</button>
-    </div>
-</div>
-@endif
-
 {{-- ================= TABEL ================= --}}
 <div class="card shadow-sm mb-4" id="sectionTabel">
     <div class="card-body">
@@ -270,76 +259,4 @@
     </div>
 </div>
 @endif
-
-
-{{-- ================= GRAFIK ================= --}}
-@if($mode === 'pengunjung')
-<div class="card shadow-sm d-none" id="sectionGrafik">
-    <div class="card-body" style="height:380px">
-
-        {{-- HEADER GRAFIK + PERIODE --}}
-        <div class="d-flex align-items-center mb-2">
-            <span class="text-muted">
-                <strong> Data Pengunjung Periode : {{ $periodeText }}</strong>
-            </span>
-        </div>
-
-
-        <canvas id="grafikPengunjung"></canvas>
-    </div>
-</div>
-@endif
-
 @endsection
-
-@push('script')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-@if($mode === 'pengunjung')
-<script>
-let grafikInstance = null;
-
-function showTabel(){
-    document.getElementById('sectionTabel').classList.remove('d-none');
-    document.getElementById('sectionGrafik').classList.add('d-none');
-}
-
-function showGrafik(){
-    document.getElementById('sectionGrafik').classList.remove('d-none');
-    document.getElementById('sectionTabel').classList.add('d-none');
-
-    if (!grafikInstance) renderGrafik();
-}
-
-function renderGrafik(){
-    const ctx = document.getElementById('grafikPengunjung').getContext('2d');
-    const dataGrafik = @json($grafik);
-
-    grafikInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: dataGrafik.map(d => d.label),
-            datasets: [{
-                label: 'Jumlah Pengunjung',
-                data: dataGrafik.map(d => d.total),
-                backgroundColor: '#0d6efd',
-                borderRadius: 6,
-                barPercentage: 0.6,
-                categoryPercentage: 0.6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            }
-        }
-    });
-}
-</script>
-@endif
-@endpush
