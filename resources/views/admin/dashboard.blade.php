@@ -11,23 +11,36 @@
 @endphp
 
 {{-- ================= HEADER ================= --}}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Dashboard</h3>
+        <div class="text-muted">{{ $today }}</div>
+    </div>
+</div>
+
+{{-- MODE SWITCH TAB --}}
 <div class="mb-4">
-    <h3 class="fw-bold">Dashboard</h3>
-    <div class="text-muted">{{ $today }}</div>
+    <ul class="nav nav-tabs">
+
+        <li class="nav-item">
+            <a class="nav-link {{ $mode==='pengunjung' ? 'active fw-semibold' : '' }}"
+               href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode'=>'pengunjung'])) }}">
+                <i class="bi bi-people me-1"></i>
+                Data Pengunjung
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{ $mode==='survei' ? 'active fw-semibold' : '' }}"
+               href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode'=>'survei'])) }}">
+                <i class="bi bi-clipboard-check me-1"></i>
+                Data Survei
+            </a>
+        </li>
+
+    </ul>
 </div>
 
-{{-- ================= PILIH MODE ================= --}}
-<div class="mb-3">
-    <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode'=>'pengunjung'])) }}"
-       class="btn btn-outline-primary {{ $mode==='pengunjung'?'active':'' }}">
-        Data Pengunjung
-    </a>
-
-    <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['mode'=>'survei'])) }}"
-       class="btn btn-outline-success {{ $mode==='survei'?'active':'' }}">
-        Data Survei
-    </a>
-</div>
 
 {{-- ================= FILTER ================= --}}
 <div class="card shadow-sm mb-4 border-0">
