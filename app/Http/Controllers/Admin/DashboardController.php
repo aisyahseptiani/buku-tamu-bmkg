@@ -17,20 +17,29 @@ class DashboardController extends Controller
         $mode   = $request->get('mode', 'pengunjung');
         $filter = $request->get('filter', 'hari');
 
+        $bulan = $request->get('bulan', now()->month);
+        $tahun = $request->get('tahun', now()->year);
+
+
         /*
         ======================
         TENTUKAN RENTANG WAKTU
         ======================
         */
         if ($filter === 'hari') {
+
             $from = now()->startOfDay();
             $to   = now()->endOfDay();
+
         } elseif ($filter === 'bulan') {
-            $from = now()->startOfMonth();
-            $to   = now()->endOfMonth();
+
+            $from = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+            $to   = Carbon::create($tahun, $bulan, 1)->endOfMonth();
+
         } else { // tahun
-            $from = now()->startOfYear();
-            $to   = now()->endOfYear();
+
+            $from = Carbon::create($tahun, 1, 1)->startOfYear();
+            $to   = Carbon::create($tahun, 12, 31)->endOfYear();
         }
         /*
         ======================
@@ -44,6 +53,7 @@ class DashboardController extends Controller
         } else {
             $periodeText = 'Tahun ' . $from->translatedFormat('Y');
         }
+
 
 
         /*
