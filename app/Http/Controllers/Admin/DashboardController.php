@@ -27,6 +27,8 @@ class DashboardController extends Controller
         $rekapSurvei  = [];
         $total        = 0;
 
+        $totalResponden = Survei::count();
+
         /*
         ======================
         MODE SURVEI
@@ -74,7 +76,8 @@ class DashboardController extends Controller
                 'mode',
                 'filter',
                 'surveis',
-                'rekapSurvei'
+                'rekapSurvei',
+                'totalResponden'
             ));
         }
 
@@ -149,6 +152,7 @@ class DashboardController extends Controller
             'rekapBulanan',
             'surveis',
             'rekapSurvei',
+            'totalResponden',
             'total',
             'grafik'
         ));

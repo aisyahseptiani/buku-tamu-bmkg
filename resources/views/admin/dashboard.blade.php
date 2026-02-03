@@ -171,14 +171,15 @@
                     </div>
                 </div>
             @endforeach
-
-            <small class="text-muted">
-                Total responden: {{ $soal['total'] }}
-            </small>
         </div>
     </div>
 </div>
 @endforeach
+
+<div class="alert alert-info text-center">
+    <strong>Total Responden:</strong> {{ $totalResponden }}
+</div>
+
 </div>
 
 <div class="d-flex justify-content-end mt-3">
