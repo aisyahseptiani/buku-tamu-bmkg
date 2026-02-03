@@ -15,19 +15,34 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $mode   = $request->get('mode', 'pengunjung');
-        $filter = $request->filter ?? 'hari';
+        $filter = $request->get('filter', 'hari');
 
-        // ======================
-        // DEFAULT VARIABLE
-        // ======================
-        $grafik       = collect();
-        $pengunjungs  = collect();
-        $rekapBulanan = collect();
-        $surveis      = collect();
-        $rekapSurvei  = [];
-        $total        = 0;
+        /*
+        ======================
+        TENTUKAN RENTANG WAKTU
+        ======================
+        */
+        if ($filter === 'hari') {
+            $from = now()->startOfDay();
+            $to   = now()->endOfDay();
+        } elseif ($filter === 'bulan') {
+            $from = now()->startOfMonth();
+            $to   = now()->endOfMonth();
+        } else { // tahun
+            $from = now()->startOfYear();
+            $to   = now()->endOfYear();
+        }
 
-        $totalResponden = Survei::count();
+        /*
+        ======================
+        DEFAULT VARIABLE
+        ======================
+        */
+        $pengunjungs    = collect();
+        $grafik         = collect();
+        $rekapSurvei    = [];
+        $total          = 0;
+        $totalResponden = 0;
 
         /*
         ======================
@@ -36,24 +51,16 @@ class DashboardController extends Controller
         */
         if ($mode === 'survei') {
 
-            $from = $request->from
-                ? Carbon::parse($request->from)->startOfDay()
-                : now()->startOfMonth();
-
-            $to = $request->to
-                ? Carbon::parse($request->to)->endOfDay()
-                : now()->endOfMonth();
-
             $surveis = Survei::whereBetween('created_at', [$from, $to])->get();
-            
-            $config  = config('survei');
+            $totalResponden = $surveis->count();
+
+            $config = config('survei');
 
             foreach ($config as $field => $item) {
 
                 $opsiData = [];
 
                 foreach ($item['opsi'] as $label) {
-
                     $jumlah = $surveis->filter(function ($row) use ($field, $label) {
                         return isset($row->jawaban[$field]) &&
                                $row->jawaban[$field] === $label;
@@ -68,16 +75,15 @@ class DashboardController extends Controller
                 $rekapSurvei[] = [
                     'pertanyaan' => $item['label'],
                     'opsi'       => $opsiData,
-                    'total'      => collect($opsiData)->sum('total'),
                 ];
             }
 
             return view('admin.dashboard', compact(
                 'mode',
                 'filter',
-                'surveis',
                 'rekapSurvei',
-                'totalResponden'
+                'totalResponden',
+                'grafik' // tetap dikirim agar blade aman
             ));
         }
 
@@ -86,51 +92,35 @@ class DashboardController extends Controller
         MODE PENGUNJUNG
         ======================
         */
+        $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
+        $total = $pengunjungs->count();
+
+        /*
+        ======================
+        DATA GRAFIK
+        ======================
+        */
         if ($filter === 'tahun') {
 
-            $tahun = $request->tahun ?? now()->year;
-
-            $pengunjungs = Pengunjung::whereYear('created_at', $tahun)->get();
-
-            $raw = Pengunjung::whereYear('created_at', $tahun)
-                ->selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
-                ->groupByRaw('MONTH(created_at)')
+            // Grafik per BULAN
+            $raw = Pengunjung::selectRaw('MONTH(created_at) bulan, COUNT(*) total')
+                ->whereBetween('created_at', [$from, $to])
+                ->groupBy('bulan')
                 ->pluck('total', 'bulan');
 
             for ($i = 1; $i <= 12; $i++) {
-
-                $jumlah = $raw[$i] ?? 0;
-
-                $rekapBulanan->push([
-                    'bulan'      => $i,
-                    'nama_bulan' => Carbon::create()->month($i)->translatedFormat('F'),
-                    'total'      => $jumlah
-                ]);
-
                 $grafik->push([
                     'label' => Carbon::create()->month($i)->translatedFormat('F'),
-                    'total' => $jumlah
+                    'total' => $raw[$i] ?? 0
                 ]);
             }
 
-            $total = $rekapBulanan->sum('total');
-        }
-        else {
+        } else {
 
-            $from = $request->from
-                ? Carbon::parse($request->from)->startOfDay()
-                : now()->startOfMonth();
-
-            $to = $request->to
-                ? Carbon::parse($request->to)->endOfDay()
-                : now()->endOfMonth();
-
-            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
-            $total = $pengunjungs->count();
-
-            $rawGrafik = Pengunjung::whereBetween('created_at', [$from, $to])
-                ->selectRaw('DATE(created_at) as tanggal, COUNT(*) as total')
-                ->groupByRaw('DATE(created_at)')
+            // Grafik per HARI
+            $raw = Pengunjung::selectRaw('DATE(created_at) tanggal, COUNT(*) total')
+                ->whereBetween('created_at', [$from, $to])
+                ->groupBy('tanggal')
                 ->pluck('total', 'tanggal');
 
             $periode = CarbonPeriod::create($from, $to);
@@ -140,7 +130,7 @@ class DashboardController extends Controller
 
                 $grafik->push([
                     'label' => $date->translatedFormat('d M'),
-                    'total' => $rawGrafik[$tgl] ?? 0
+                    'total' => $raw[$tgl] ?? 0
                 ]);
             }
         }
@@ -149,12 +139,8 @@ class DashboardController extends Controller
             'mode',
             'filter',
             'pengunjungs',
-            'rekapBulanan',
-            'surveis',
-            'rekapSurvei',
-            'totalResponden',
-            'total',
-            'grafik'
+            'grafik',
+            'total'
         ));
     }
 
@@ -165,29 +151,20 @@ class DashboardController extends Controller
     */
     public function exportPdf(Request $request)
     {
-        $filter = $request->filter ?? 'hari';
+        $filter = $request->get('filter', 'hari');
 
-        if ($filter === 'tahun') {
-
-            $tahun = $request->tahun ?? now()->year;
-
-            $pengunjungs = Pengunjung::whereYear('created_at', $tahun)->get();
-
-            $from = Carbon::create($tahun, 1, 1);
-            $to   = Carbon::create($tahun, 12, 31);
+        if ($filter === 'hari') {
+            $from = now()->startOfDay();
+            $to   = now()->endOfDay();
+        } elseif ($filter === 'bulan') {
+            $from = now()->startOfMonth();
+            $to   = now()->endOfMonth();
+        } else {
+            $from = now()->startOfYear();
+            $to   = now()->endOfYear();
         }
-        else {
 
-            $from = $request->from
-                ? Carbon::parse($request->from)->startOfDay()
-                : now()->startOfMonth();
-
-            $to = $request->to
-                ? Carbon::parse($request->to)->endOfDay()
-                : now()->endOfMonth();
-
-            $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
-        }
+        $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
 
         $pdf = Pdf::loadView(
             'admin.dashboard-pdf',

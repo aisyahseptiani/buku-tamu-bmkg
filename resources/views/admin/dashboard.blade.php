@@ -5,9 +5,9 @@
 @section('content')
 @php
     use Carbon\Carbon;
-    $today = Carbon::now()->translatedFormat('l, d F Y');
-    $mode  = request('mode', 'pengunjung');
-    $filter = request('filter');
+    $today  = Carbon::now()->translatedFormat('l, d F Y');
+    $mode   = request('mode', 'pengunjung');
+    $filter = request('filter', 'hari');
 @endphp
 
 {{-- ================= HEADER ================= --}}
@@ -30,42 +30,75 @@
 </div>
 
 {{-- ================= FILTER ================= --}}
-<div class="card shadow-sm mb-4">
-    <div class="card-body py-3">
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-body">
         <form method="GET">
             <input type="hidden" name="mode" value="{{ $mode }}">
 
             <div class="row g-3 align-items-end">
+
+                {{-- JENIS FILTER --}}
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Jenis Filter</label>
-                    <select name="filter" class="form-select form-select-sm">
-                        <option value="hari" {{ $filter=='hari'?'selected':'' }}>Hari Ini</option>
-                        <option value="minggu" {{ $filter=='minggu'?'selected':'' }}>Mingguan</option>
-                        <option value="bulan" {{ $filter=='bulan'?'selected':'' }}>Bulanan</option>
-                        <option value="tahun" {{ $filter=='tahun'?'selected':'' }}>Tahunan</option>
+                    <label class="form-label small fw-semibold text-secondary">
+                        Jenis Filter
+                    </label>
+                    <select name="filter"
+                            class="form-select form-select-sm"
+                            onchange="this.form.submit()">
+                        <option value="hari" {{ $filter=='hari'?'selected':'' }}>
+                            📅 Hari Ini
+                        </option>
+                        <option value="bulan" {{ $filter=='bulan'?'selected':'' }}>
+                            🗓️ Bulanan
+                        </option>
+                        <option value="tahun" {{ $filter=='tahun'?'selected':'' }}>
+                            📆 Tahunan
+                        </option>
                     </select>
                 </div>
 
-                @if($filter !== 'hari')
-                <div class="col-md-5">
-                    <label class="form-label small fw-semibold">Rentang Tanggal</label>
-                    <div class="input-group input-group-sm">
-                        <input type="date" name="from" class="form-control" value="{{ request('from') }}">
-                        <span class="input-group-text">—</span>
-                        <input type="date" name="to" class="form-control" value="{{ request('to') }}">
-                    </div>
+                {{-- BULAN --}}
+                @if($filter === 'bulan')
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-secondary">
+                        Bulan
+                    </label>
+                    <select name="bulan" class="form-select form-select-sm">
+                        @foreach(range(1,12) as $b)
+                            <option value="{{ $b }}"
+                                {{ request('bulan', now()->month)==$b?'selected':'' }}>
+                                {{ \Carbon\Carbon::create()->month($b)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 @endif
 
+                {{-- TAHUN --}}
+                @if(in_array($filter, ['bulan','tahun']))
                 <div class="col-md-2">
-                    <button class="btn btn-primary btn-sm w-100 fw-semibold">
-                        Tampilkan
+                    <label class="form-label small fw-semibold text-secondary">
+                        Tahun
+                    </label>
+                    <input type="number"
+                           name="tahun"
+                           class="form-control form-control-sm"
+                           value="{{ request('tahun', now()->year) }}">
+                </div>
+                @endif
+
+                {{-- TOMBOL --}}
+                <div class="col-md-2">
+                    <button class="btn btn-primary btn-sm w-100 fw-semibold shadow-sm">
+                        <i class="bi bi-funnel"></i> Tampilkan
                     </button>
                 </div>
+
             </div>
         </form>
     </div>
 </div>
+
 
 {{-- ================= SWITCH ================= --}}
 @if($mode === 'pengunjung')
@@ -81,7 +114,6 @@
 <div class="card shadow-sm mb-4" id="sectionTabel">
     <div class="card-body">
 
-{{-- ================= DATA PENGUNJUNG ================= --}}
 @if($mode === 'pengunjung')
 
 <h5 class="mb-3">Data Pengunjung</h5>
@@ -139,13 +171,19 @@
 </table>
 </div>
 @endif
+
+<div class="d-flex justify-content-end mt-3">
+    <a href="{{ route('admin.dashboard.exportPdf', request()->query()) }}" class="btn btn-danger">
+        Download PDF
+    </a>
+</div>
+
 @endif
 
 {{-- ================= DATA SURVEI ================= --}}
-@if($mode === 'survei' && isset($rekapSurvei) && count($rekapSurvei) > 0)
-
+@if($mode === 'survei' && !empty($rekapSurvei))
 <hr class="my-4">
-<h5 class="mb-4 fw-bold">Rekapitulasi Hasil Survei Kepuasan</h5>
+<h5 class="mb-4 fw-bold">Rekapitulasi Hasil Survei</h5>
 
 <div class="row">
 @foreach($rekapSurvei as $soal)
@@ -155,47 +193,36 @@
             <h6 class="fw-bold mb-3">{{ $soal['pertanyaan'] }}</h6>
 
             @foreach($soal['opsi'] as $opsi)
-                @php
-                    $persen = $soal['total'] > 0
-                        ? round(($opsi['total'] / $soal['total']) * 100, 1)
-                        : 0;
-                @endphp
-
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between small">
-                        <span>{{ $opsi['label'] }}</span>
-                        <span>{{ $opsi['total'] }}</span>
-                    </div>
-                    <div class="progress" style="height:6px">
-                        <div class="progress-bar bg-success" style="width:{{ $persen }}%"></div>
+            <div class="mb-2">
+                <div class="d-flex justify-content-between small">
+                    <span>{{ $opsi['label'] }}</span>
+                    <span>{{ $opsi['total'] }}</span>
+                </div>
+                <div class="progress" style="height:6px">
+                    <div class="progress-bar bg-success"
+                         style="width:{{ $totalResponden ? ($opsi['total']/$totalResponden)*100 : 0 }}%">
                     </div>
                 </div>
+            </div>
             @endforeach
         </div>
     </div>
 </div>
 @endforeach
+</div>
 
 <div class="alert alert-info text-center">
     <strong>Total Responden:</strong> {{ $totalResponden }}
 </div>
-
-</div>
-
-<div class="d-flex justify-content-end mt-3">
-    <a href="{{ route('admin.dashboard.exportPdf', request()->query()) }}" class="btn btn-danger">
-        Download PDF
-    </a>
-</div>
-
 @endif
-</div>
+
+    </div>
 </div>
 
 {{-- ================= GRAFIK ================= --}}
 @if($mode === 'pengunjung')
 <div class="card shadow-sm d-none" id="sectionGrafik">
-    <div class="card-body">
+    <div class="card-body" style="height:380px">
         <h5 class="mb-3">Grafik Pengunjung</h5>
         <canvas id="grafikPengunjung"></canvas>
     </div>
@@ -209,13 +236,48 @@
 
 @if($mode === 'pengunjung')
 <script>
+let grafikInstance = null;
+
 function showTabel(){
-    sectionTabel.classList.remove('d-none');
-    sectionGrafik.classList.add('d-none');
+    document.getElementById('sectionTabel').classList.remove('d-none');
+    document.getElementById('sectionGrafik').classList.add('d-none');
 }
+
 function showGrafik(){
-    sectionGrafik.classList.remove('d-none');
-    sectionTabel.classList.add('d-none');
+    document.getElementById('sectionGrafik').classList.remove('d-none');
+    document.getElementById('sectionTabel').classList.add('d-none');
+
+    if (!grafikInstance) renderGrafik();
+}
+
+function renderGrafik(){
+    const ctx = document.getElementById('grafikPengunjung').getContext('2d');
+    const dataGrafik = @json($grafik);
+
+    grafikInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dataGrafik.map(d => d.label),
+            datasets: [{
+                label: 'Jumlah Pengunjung',
+                data: dataGrafik.map(d => d.total),
+                backgroundColor: '#0d6efd',
+                borderRadius: 6,
+                barPercentage: 0.6,
+                categoryPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
 }
 </script>
 @endif
