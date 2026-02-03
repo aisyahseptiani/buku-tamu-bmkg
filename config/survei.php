@@ -2,33 +2,104 @@
 
 return [
 
-    'kepuasan' => [
-        'label' => 'Tingkat Kepuasan Pengunjung',
+    'persyaratan' => [
+        'label' => 'Persyaratan Pelayanan',
         'opsi' => [
-            'sangat_puas' => 'Sangat Puas',
-            'puas'        => 'Puas',
-            'cukup'       => 'Cukup',
-            'tidak_puas'  => 'Tidak Puas',
-        ],
+            'Sangat Praktis',
+            'Cukup Praktis',
+            'Kurang Praktis',
+            'Tidak Praktis',
+        ]
     ],
 
-    'pelayanan' => [
-        'label' => 'Pelayanan Petugas',
+    'kemudahan' => [
+        'label' => 'Kemudahan Pelayanan',
         'opsi' => [
-            'sangat_baik' => 'Sangat Baik',
-            'baik'        => 'Baik',
-            'cukup'       => 'Cukup',
-            'kurang'      => 'Kurang',
-        ],
+            'Sangat Mudah',
+            'Cukup Mudah',
+            'Kurang Mudah',
+            'Tidak Mudah',
+        ]
     ],
 
-    'fasilitas' => [
-        'label' => 'Fasilitas',
+    'kecepatan' => [
+        'label' => 'Kecepatan Petugas',
         'opsi' => [
-            'sangat_baik' => 'Sangat Baik',
-            'baik'        => 'Baik',
-            'cukup'       => 'Cukup',
-            'kurang'      => 'Kurang',
-        ],
+            'Sangat Cepat',
+            'Cukup Cepat',
+            'Kurang Cepat',
+            'Tidak Cepat',
+        ]
     ],
+
+    'akses_informasi' => [
+        'label' => 'Kemudahan Akses Informasi Meteorologi Penerbangan',
+        'opsi' => [
+            'Sangat Mudah',
+            'Cukup Mudah',
+            'Kurang Mudah',
+            'Tidak Mudah',
+        ]
+    ],
+
+    'website' => [
+        'label' => 'Pelayanan Informasi Website / Media Sosial',
+        'opsi' => [
+            'Sangat Praktis',
+            'Cukup Praktis',
+            'Kurang Praktis',
+            'Tidak Praktis',
+        ]
+    ],
+
+    'kesesuaian_produk' => [
+        'label' => 'Kesesuaian Produk Pelayanan',
+        'opsi' => [
+            'Sangat Sesuai',
+            'Cukup Sesuai',
+            'Kurang Sesuai',
+            'Tidak Sesuai',
+        ]
+    ],
+
+    'kompetensi' => [
+        'label' => 'Kemampuan Petugas',
+        'opsi' => [
+            'Sangat Mampu',
+            'Cukup Mampu',
+            'Kurang Mampu',
+            'Tidak Mampu',
+        ]
+    ],
+
+    'kesopanan' => [
+        'label' => 'Kesopanan dan Perilaku Petugas',
+        'opsi' => [
+            'Sangat Sopan/Ramah',
+            'Cukup Sopan/Ramah',
+            'Kurang Sopan/Ramah',
+            'Tidak Sopan/Ramah',
+        ]
+    ],
+
+    'sarana' => [
+        'label' => 'Sarana dan Prasarana',
+        'opsi' => [
+            'Sangat Baik',
+            'Cukup',
+            'Kurang Baik',
+            'Tidak Baik',
+        ]
+    ],
+
+    'pengaduan' => [
+        'label' => 'Penanganan Pengaduan',
+        'opsi' => [
+            'Dikelola Sangat Baik',
+            'Dikelola Cukup Baik',
+            'Kurang Maksimal',
+            'Tidak Berfungsi',
+        ]
+    ],
+
 ];

@@ -148,62 +148,72 @@
 
                         {{-- LOOP PERTANYAAN --}}
                         @php
-                            $questions = [
-                                'Persyaratan pelayanan' => [
-                                    'Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis'
-                                ],
-                                'Kemudahan pelayanan' => [
-                                    'Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah'
-                                ],
-                                'Kecepatan petugas' => [
-                                    'Sangat Cepat', 'Cukup Cepat', 'Kurang Cepat', 'Tidak Cepat'
-                                ],
-                                'Akses informasi Meteorologi Penerbangan' => [
-                                    'Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah'
-                                ],
-                                'Pelayanan informasi website/media sosial' => [
-                                    'Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis'
-                                ],
-                                'Kesesuaian produk pelayanan' => [
-                                    'Sangat Sesuai', 'Cukup Sesuai', 'Kurang Sesuai', 'Tidak Sesuai'
-                                ],
-                                'Kemampuan petugas' => [
-                                    'Sangat Mampu', 'Cukup Mampu', 'Kurang Mampu', 'Tidak Mampu'
-                                ],
-                                'Kesopanan dan perilaku petugas' => [
-                                    'Sangat Sopan/Ramah', 'Cukup Sopan/Ramah', 'Kurang Sopan/Ramah', 'Tidak Sopan/Ramah'
-                                ],
-                                'Sarana dan prasarana' => [
-                                    'Sangat Baik', 'Cukup', 'Kurang Baik', 'Tidak Baik'
-                                ],
-                                'Penanganan pengaduan' => [
-                                    'Dikelola Sangat Baik', 'Dikelola Cukup Baik', 'Kurang Maksimal', 'Tidak Berfungsi'
-                                ],
-                            ];
+                        $questions = [
+                            'persyaratan' => [
+                                'label' => 'persyaratan pelayanan',
+                                'opsi'  => ['Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis']
+                            ],
+                            'kemudahan' => [
+                                'label' => 'kemudahan pelayanan',
+                                'opsi'  => ['Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah']
+                            ],
+                            'kecepatan' => [
+                                'label' => 'kecepatan petugas',
+                                'opsi'  => ['Sangat Cepat', 'Cukup Cepat', 'Kurang Cepat', 'Tidak Cepat']
+                            ],
+                            'akses_informasi' => [
+                                'label' => 'kemudahan akses informasi Meteorologi Penerbangan',
+                                'opsi'  => ['Sangat Mudah', 'Cukup Mudah', 'Kurang Mudah', 'Tidak Mudah']
+                            ],
+                            'website' => [
+                                'label' => 'pelayanan informasi website/media sosial',
+                                'opsi'  => ['Sangat Praktis', 'Cukup Praktis', 'Kurang Praktis', 'Tidak Praktis']
+                            ],
+                            'kesesuaian_produk' => [
+                                'label' => 'kesesuaian produk pelayanan',
+                                'opsi'  => ['Sangat Sesuai', 'Cukup Sesuai', 'Kurang Sesuai', 'Tidak Sesuai']
+                            ],
+                            'kompetensi' => [
+                                'label' => 'kemampuan petugas',
+                                'opsi'  => ['Sangat Mampu', 'Cukup Mampu', 'Kurang Mampu', 'Tidak Mampu']
+                            ],
+                            'kesopanan' => [
+                                'label' => 'kesopanan dan perilaku petugas',
+                                'opsi'  => ['Sangat Sopan/Ramah', 'Cukup Sopan/Ramah', 'Kurang Sopan/Ramah', 'Tidak Sopan/Ramah']
+                            ],
+                            'sarana' => [
+                                'label' => 'kualitas sarana dan prasarana',
+                                'opsi'  => ['Sangat Baik', 'Cukup', 'Kurang Baik', 'Tidak Baik']
+                            ],
+                            'pengaduan' => [
+                                'label' => 'penanganan pengaduan pengguna layanan',
+                                'opsi'  => ['Dikelola Sangat Baik', 'Dikelola Cukup Baik', 'Kurang Maksimal', 'Tidak Berfungsi']
+                            ],
+                        ];
                         @endphp
 
-                        @foreach($questions as $label => $options)
-                            <div class="mb-4">
-                                <label class="form-label">
-                                    Bagaimana pendapat saudara tentang {{ strtolower($label) }}?
-                                </label>
+                        @foreach($questions as $key => $q)
+                        <div class="mb-4">
+                            <label class="form-label">
+                                Bagaimana pendapat saudara tentang {{ $q['label'] }}?
+                            </label>
 
-                                <div class="select-wrapper">
-                                    <select name="jawaban[]" class="form-select" required>
-                                        <option value="">Pilih jawaban</option>
-                                        @foreach($options as $opt)
-                                            <option value="{{ $opt }}">{{ $opt }}</option>
-                                        @endforeach
-                                    </select>
+                            <div class="select-wrapper">
+                                <select name="jawaban[{{ $key }}]" class="form-select" required>
+                                    <option value="">Pilih jawaban</option>
+                                    @foreach($q['opsi'] as $opt)
+                                        <option value="{{ $opt }}">{{ $opt }}</option>
+                                    @endforeach
+                                </select>
 
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
                             </div>
+                        </div>
                         @endforeach
-
 
                         {{-- SARAN --}}
                         <div class="mb-4">

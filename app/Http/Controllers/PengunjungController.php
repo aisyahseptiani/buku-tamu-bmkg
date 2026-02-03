@@ -72,6 +72,8 @@ class PengunjungController extends Controller
      * ========================= */
     public function storeSurvei(Request $request)
     {
+        
+
         if (!$this->isPreview($request) && !session()->has('pengunjung')) {
             abort(403, 'Silakan scan QR terlebih dahulu.');
         }
@@ -118,5 +120,8 @@ class PengunjungController extends Controller
         return redirect()
             ->route('pengunjung.step1', ['preview' => 1])
             ->with('success', 'Terima kasih atas surveinya');
+
+       
+
     }
 }

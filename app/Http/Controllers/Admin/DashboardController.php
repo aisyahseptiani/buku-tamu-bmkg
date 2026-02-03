@@ -43,17 +43,18 @@ class DashboardController extends Controller
                 : now()->endOfMonth();
 
             $surveis = Survei::whereBetween('created_at', [$from, $to])->get();
+            
             $config  = config('survei');
 
             foreach ($config as $field => $item) {
 
                 $opsiData = [];
 
-                foreach ($item['opsi'] as $value => $label) {
+                foreach ($item['opsi'] as $label) {
 
-                    $jumlah = $surveis->filter(function ($row) use ($field, $value) {
+                    $jumlah = $surveis->filter(function ($row) use ($field, $label) {
                         return isset($row->jawaban[$field]) &&
-                               $row->jawaban[$field] == $value;
+                               $row->jawaban[$field] === $label;
                     })->count();
 
                     $opsiData[] = [

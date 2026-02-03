@@ -21,4 +21,9 @@ class Survei extends Model
     protected $casts = [
         'jawaban' => 'array',
     ];
+
+    public function pengunjung()
+    {
+        return $this->belongsTo(Pengunjung::class);
+    }
 }
