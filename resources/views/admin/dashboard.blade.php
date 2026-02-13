@@ -190,70 +190,134 @@
 
 {{-- ================= DATA SURVEI ================= --}}
 @if($mode === 'survei' && !empty($rekapSurvei))
+    @foreach($rekapSurvei as $soal)
 
-<hr class="my-4">
+    @php
+        $total = collect($soal['opsi'])->sum('total');
+        $max = collect($soal['opsi'])->max('total');
+    @endphp
 
-<div class="d-flex align-items-center mb-3">
-    <span class="text-muted">
-        <strong>Rekapitulasi Survei Periode : {{ $periodeText }}</strong>
-    </span>
-</div>
+    <div class="card border-0 shadow-sm mb-4 survey-card">
+        <div class="card-body p-4">
 
-<div class="row g-4">
-@foreach($rekapSurvei as $index => $soal)
-<div class="col-md-6">
-    <div class="card shadow-sm h-100 border-0">
-        <div class="card-body py-3">
-
-            {{-- HEADER PERTANYAAN --}}
-            <div class="d-flex align-items-start mb-3">
-                <div class="me-2 text-success fs-5">
-                    <i class="bi bi-chat-square-text"></i>
-                </div>
-                <h6 class="fw-bold mb-0">
+            <div class="mb-4">
+                <h6 class="fw-bold mb-1">
                     {{ $soal['pertanyaan'] }}
                 </h6>
+                <small class="text-muted">
+                    {{ $total }} Total Responden
+                </small>
             </div>
 
-            {{-- OPSI JAWABAN --}}
             @foreach($soal['opsi'] as $opsi)
-            @php
-                $percent = $totalResponden
-                    ? round(($opsi['total'] / $totalResponden) * 100)
-                    : 0;
 
-                $isTop = $percent >= 50;
-            @endphp
+                @php
+                    $persen = $total > 0 ? round(($opsi['total'] / $total) * 100) : 0;
+                    $isTop = $opsi['total'] == $max && $max > 0;
+                @endphp
 
-            <div class="mb-3">
-                <div class="d-flex justify-content-between small mb-1">
-                    <span>
-                        {{ $opsi['label'] }}
-                        @if($isTop)
-                            <span class="badge bg-success ms-1">
-                                Terbanyak
-                            </span>
-                        @endif
-                    </span>
-                    <span class="fw-semibold">
-                        {{ $percent }}%
-                    </span>
-                </div>
+                <div class="ranking-item position-relative mb-2 {{ $isTop ? 'top-item' : '' }}">
 
-                <div class="progress" style="height:8px">
-                    <div class="progress-bar
-                        {{ $isTop ? 'bg-success' : 'bg-secondary' }}"
-                        style="width:{{ $percent }}%">
+                    <div class="ranking-bar"
+                        style="width: {{ $persen }}%;">
                     </div>
+
+                    <div class="ranking-content d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="option-label">
+                                {{ $opsi['label'] }}
+
+                                @if($isTop)
+                                    <span class="badge-top ms-2">
+                                        Terbanyak
+                                    </span>
+                                @endif
+                            </div>
+
+                            <small class="text-muted">
+                                {{ $opsi['total'] }} respon
+                            </small>
+                        </div>
+
+                        <div class="ranking-percent">
+                            {{ $persen }}%
+                        </div>
+
+                    </div>
+
                 </div>
-            </div>
+
             @endforeach
 
         </div>
     </div>
-</div>
-@endforeach
-</div>
+
+    @endforeach
+
+<style>
+
+.survey-card {
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.ranking-item {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 8px 14px;   /* 🔥 lebih kecil */
+    min-height: 48px;    /* 🔥 lebih pendek */
+    overflow: hidden;
+    transition: background 0.2s ease;
+}
+
+.ranking-item:hover {
+    background: #f1f5f9;
+}
+
+.ranking-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #2563eb, #60a5fa);
+    opacity: 0.10;
+    transition: width 0.8s ease;
+}
+
+.ranking-content {
+    position: relative;
+    z-index: 2;
+}
+
+.option-label {
+    font-size: 13px;   /* 🔥 lebih kecil */
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.ranking-percent {
+    font-size: 14px;   /* 🔥 lebih kecil */
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.badge-top {
+    font-size: 10px;   /* 🔥 lebih kecil */
+    background: #2563eb;
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 14px;
+}
+
+.top-item {
+    background: #eef2ff;
+}
+
+</style>
+
+
+
 
 <div class="mt-4">
     <div class="bg-success bg-opacity-10 text-success px-4 py-3 rounded-top
@@ -272,4 +336,71 @@
     </div>
 </div>
 @endif
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    @foreach($rekapSurvei ?? [] as $index => $soal)
+
+    let labels{{ $index }} = {!! json_encode(array_column($soal['opsi'], 'label')) !!};
+    let data{{ $index }}   = {!! json_encode(array_column($soal['opsi'], 'total')) !!};
+
+    let totalRespon{{ $index }} = data{{ $index }}.reduce((a,b)=>a+b,0);
+
+    new Chart(document.getElementById('chart{{ $index }}'), {
+        type: 'bar',
+        data: {
+            labels: labels{{ $index }},
+            datasets: [{
+                data: data{{ $index }},
+                backgroundColor: [
+                    '#198754',
+                    '#20c997',
+                    '#0dcaf0',
+                    '#ffc107',
+                    '#dc3545'
+                ],
+                borderRadius: 8,
+                barThickness: 22,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            animation: {
+                duration: 1200
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.raw;
+                            let percent = totalRespon{{ $index }} 
+                                ? ((value / totalRespon{{ $index }}) * 100).toFixed(1)
+                                : 0;
+                            return value + " respon (" + percent + "%)";
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "#e9ecef"
+                    }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    @endforeach
+
+});
+</script>
 @endsection
