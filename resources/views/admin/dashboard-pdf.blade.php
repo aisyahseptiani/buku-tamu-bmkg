@@ -156,15 +156,9 @@
 
     <!-- PERIODE -->
     <div class="periode">
-        @if(isset($tanggalMulai) && isset($tanggalAkhir))
-            Laporan Pengunjung Periode
-            {{ \Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d F Y') }}
-            sampai
-            {{ \Carbon\Carbon::parse($tanggalAkhir)->translatedFormat('d F Y') }}
-        @else
-            Hari, {{ now()->translatedFormat('d F Y') }}
-        @endif
+        <strong>Periode :</strong> {{ $periodeText }}
     </div>
+
 
     <!-- TABEL DATA -->
     <table class="data">
@@ -208,12 +202,12 @@
             </div>
 
             <div class="ttd-isi">
-                Kepala Stasiun Meteorologi Kelas I<br>
+                Plt. Kepala Stasiun Meteorologi Kelas I<br>
                 Sultan Syarif Kasim II
             </div>
 
             <div class="ttd-nama">
-                Irwansyah Nasution
+                Warih Budi Lestari
             </div>
 
         </div>

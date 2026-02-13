@@ -137,23 +137,33 @@ class DashboardController extends Controller
     public function exportPdf(Request $request)
     {
         $filter = $request->get('filter', 'hari');
+        $bulan  = $request->get('bulan', now()->month);
+        $tahun  = $request->get('tahun', now()->year);
 
         if ($filter === 'hari') {
+
             $from = now()->startOfDay();
             $to   = now()->endOfDay();
+            $periodeText = $from->translatedFormat('l, d F Y');
+
         } elseif ($filter === 'bulan') {
-            $from = now()->startOfMonth();
-            $to   = now()->endOfMonth();
-        } else {
-            $from = now()->startOfYear();
-            $to   = now()->endOfYear();
+
+            $from = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+            $to   = Carbon::create($tahun, $bulan, 1)->endOfMonth();
+            $periodeText = $from->translatedFormat('F Y');
+
+        } else { // tahun
+
+            $from = Carbon::create($tahun, 1, 1)->startOfYear();
+            $to   = Carbon::create($tahun, 12, 31)->endOfYear();
+            $periodeText = 'Tahun ' . $from->translatedFormat('Y');
         }
 
         $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
 
         $pdf = Pdf::loadView(
             'admin.dashboard-pdf',
-            compact('pengunjungs', 'filter', 'from', 'to')
+            compact('pengunjungs', 'periodeText')
         );
 
         return $pdf->download(
