@@ -10,6 +10,8 @@
     $filter = request('filter', 'hari');
 @endphp
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 {{-- ================= HEADER ================= --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -190,160 +192,131 @@
 
 {{-- ================= DATA SURVEI ================= --}}
 @if($mode === 'survei' && !empty($rekapSurvei))
-    @foreach($rekapSurvei as $soal)
 
-    @php
-        $total = collect($soal['opsi'])->sum('total');
-        $max = collect($soal['opsi'])->max('total');
-    @endphp
+{{-- ===================== --}}
+{{-- SUMMARY SECTION --}}
+{{-- ===================== --}}
+<div class="card border-0 shadow-sm rounded-4 mb-5">
+    <div class="card-body p-4 d-flex justify-content-between align-items-center">
 
-    <div class="card border-0 shadow-sm mb-4 survey-card">
-        <div class="card-body p-4">
-
-            <div class="mb-4">
-                <h6 class="fw-bold mb-1">
-                    {{ $soal['pertanyaan'] }}
-                </h6>
+        {{-- LEFT --}}
+        <div>
+            <div class="text-muted small mb-1">
+                Total Responden
             </div>
+            <div class="fs-2 fw-bold text-primary">
+                {{ $totalResponden }}
+            </div>
+        </div>
 
-            @foreach($soal['opsi'] as $opsi)
+        {{-- RIGHT --}}
+        <div class="d-flex align-items-center gap-3">
 
-                @php
-                    $persen = $total > 0 ? round(($opsi['total'] / $total) * 100) : 0;
-                    $isTop = $opsi['total'] == $max && $max > 0;
-                @endphp
-
-                <div class="ranking-item position-relative mb-2 {{ $isTop ? 'top-item' : '' }}">
-
-                    <div class="ranking-bar"
-                        style="width: {{ $persen }}%;">
-                    </div>
-
-                    <div class="ranking-content d-flex justify-content-between align-items-center">
-
-                        <div>
-                            <div class="option-label">
-                                {{ $opsi['label'] }}
-
-                                @if($isTop)
-                                    <span class="badge-top ms-2">
-                                        Terbanyak
-                                    </span>
-                                @endif
-                            </div>
-
-                            <small class="text-muted">
-                                {{ $opsi['total'] }} respon
-                            </small>
-                        </div>
-
-                        <div class="ranking-percent">
-                            {{ $persen }}%
-                        </div>
-
-                    </div>
-
-                </div>
-
-            @endforeach
+            <a href="{{ route('admin.survei.download', [
+                'filter' => $filter,
+                'bulan'  => request('bulan'),
+                'tahun'  => request('tahun')
+            ]) }}" 
+            class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-download me-1"></i>
+                Download PDF
+            </a>
 
         </div>
-    </div>
-
-    @endforeach
-
-<style>
-
-    .survey-card {
-        border-radius: 14px;
-        background: #ffffff;
-    }
-
-    .ranking-item {
-        background: #f9fafb;
-        border-radius: 8px;
-        padding: 8px 14px;   /* 🔥 lebih kecil */
-        min-height: 48px;    /* 🔥 lebih pendek */
-        overflow: hidden;
-        transition: background 0.2s ease;
-    }
-
-    .ranking-item:hover {
-        background: #f1f5f9;
-    }
-
-    .ranking-bar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        background: linear-gradient(90deg, #2563eb, #60a5fa);
-        opacity: 0.10;
-        transition: width 0.8s ease;
-    }
-
-    .ranking-content {
-        position: relative;
-        z-index: 2;
-    }
-
-    .option-label {
-        font-size: 13px;   /* 🔥 lebih kecil */
-        font-weight: 600;
-        color: #1f2937;
-    }
-
-    .ranking-percent {
-        font-size: 14px;   /* 🔥 lebih kecil */
-        font-weight: 700;
-        color: #1f2937;
-    }
-
-    .badge-top {
-        font-size: 10px;   /* 🔥 lebih kecil */
-        background: #2563eb;
-        color: #ffffff;
-        padding: 2px 6px;
-        border-radius: 14px;
-    }
-
-    .top-item {
-        background: #eef2ff;
-    }
-</style>
-
-
-<div class="mt-4">
-    <div class="bg-primary bg-opacity-10 text-primary px-4 py-3 rounded-top
-                border-top border-3 border-primary
-                d-flex justify-content-between align-items-center">
-
-        <span>
-            <i class="bi bi-people-fill me-1"></i>
-            Total Responden
-        </span>
-
-        <span class="fw-bold fs-5">
-            {{ $totalResponden }}
-        </span>
 
     </div>
 </div>
-@endif
 
 
-<!-- tombol download survei -->
-@if($mode === 'survei')
-    <div class="text-end mt-3">
-        <a href="{{ route('admin.survei.download', [
-            'filter' => $filter,
-            'bulan'  => request('bulan'),
-            'tahun'  => request('tahun')
-        ]) }}" 
-        class="btn btn-danger">
-            Download PDF
-        </a>
+{{-- ===================== --}}
+{{-- LOOP PERTANYAAN --}}
+{{-- ===================== --}}
+@foreach($rekapSurvei as $index => $soal)
+
+@php
+    $labels = collect($soal['opsi'])->pluck('label');
+    $data = collect($soal['opsi'])->pluck('total');
+    $max = $data->max();
+@endphp
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+
+        <h6 class="fw-semibold mb-4">
+            {{ $soal['pertanyaan'] }}
+        </h6>
+
+        <canvas id="chart{{ $index }}" height="120"></canvas>
+
+        @php
+            $dominant = collect($soal['opsi'])->firstWhere('total', $max);
+        @endphp
+
+        @if($dominant && $max > 0)
+            <div class="mt-3 small text-muted">
+                Mayoritas responden memilih 
+                <span class="fw-semibold text-primary">
+                    {{ $dominant['label'] }}
+                </span>
+                ({{ round(($max / $data->sum()) * 100) }}%)
+            </div>
+        @endif
+
     </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const ctx{{ $index }} = document.getElementById('chart{{ $index }}');
+
+    new Chart(ctx{{ $index }}, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($labels) !!},
+            datasets: [{
+                data: {!! json_encode($data) !!},
+                backgroundColor: {!! json_encode(
+                    collect($soal['opsi'])->map(function($o) use ($max){
+                        return $o['total'] == $max 
+                            ? 'rgba(13,110,253,0.8)' 
+                            : 'rgba(108,117,125,0.4)';
+                    })
+                ) !!},
+                borderRadius: 8,
+                barThickness: 18
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+
+    });
+
+});
+</script>
+
+@endforeach
+
 @endif
 
 
