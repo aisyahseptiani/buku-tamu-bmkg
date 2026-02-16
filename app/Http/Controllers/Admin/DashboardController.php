@@ -175,4 +175,69 @@ class DashboardController extends Controller
         );
     }
 
+    public function downloadSurvei(Request $request)
+    {
+        Carbon::setLocale('id');
+
+        $filter = $request->get('filter', 'hari');
+        $bulan  = $request->get('bulan', now()->month);
+        $tahun  = $request->get('tahun', now()->year);
+
+        // Tentukan rentang waktu (sama seperti index)
+        if ($filter === 'hari') {
+            $from = now()->startOfDay();
+            $to   = now()->endOfDay();
+            $periodeText = $from->translatedFormat('l, d F Y');
+        } elseif ($filter === 'bulan') {
+            $from = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+            $to   = Carbon::create($tahun, $bulan, 1)->endOfMonth();
+            $periodeText = $from->translatedFormat('F Y');
+        } else {
+            $from = Carbon::create($tahun, 1, 1)->startOfYear();
+            $to   = Carbon::create($tahun, 12, 31)->endOfYear();
+            $periodeText = 'Tahun ' . $from->translatedFormat('Y');
+        }
+
+        $surveis = Survei::whereBetween('created_at', [$from, $to])->get();
+        $totalResponden = $surveis->count();
+        $config = config('survei');
+
+        $rekapSurvei = [];
+
+        foreach ($config as $field => $item) {
+            $opsiData = [];
+
+            foreach ($item['opsi'] as $label) {
+                $jumlah = $surveis->filter(function ($row) use ($field, $label) {
+                    return isset($row->jawaban[$field]) &&
+                        $row->jawaban[$field] === $label;
+                })->count();
+
+                $persen = $totalResponden > 0
+                    ? round(($jumlah / $totalResponden) * 100, 1)
+                    : 0;
+
+                $opsiData[] = [
+                    'label' => $label,
+                    'total' => $jumlah,
+                    'persen'=> $persen
+                ];
+            }
+
+            $rekapSurvei[] = [
+                'pertanyaan' => $item['label'],
+                'opsi'       => $opsiData,
+            ];
+        }
+
+        $pdf = Pdf::loadView('admin.pdf_survei', compact(
+            'rekapSurvei',
+            'periodeText',
+            'totalResponden'
+        ))->setPaper('A4', 'portrait');
+
+        return $pdf->download('Laporan_Survei_BMKG.pdf');
+    }
+
+
 }

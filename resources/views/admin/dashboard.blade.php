@@ -204,9 +204,6 @@
                 <h6 class="fw-bold mb-1">
                     {{ $soal['pertanyaan'] }}
                 </h6>
-                <small class="text-muted">
-                    {{ $total }} Total Responden
-                </small>
             </div>
 
             @foreach($soal['opsi'] as $opsi)
@@ -257,71 +254,68 @@
 
 <style>
 
-.survey-card {
-    border-radius: 14px;
-    background: #ffffff;
-}
+    .survey-card {
+        border-radius: 14px;
+        background: #ffffff;
+    }
 
-.ranking-item {
-    background: #f9fafb;
-    border-radius: 8px;
-    padding: 8px 14px;   /* 🔥 lebih kecil */
-    min-height: 48px;    /* 🔥 lebih pendek */
-    overflow: hidden;
-    transition: background 0.2s ease;
-}
+    .ranking-item {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 8px 14px;   /* 🔥 lebih kecil */
+        min-height: 48px;    /* 🔥 lebih pendek */
+        overflow: hidden;
+        transition: background 0.2s ease;
+    }
 
-.ranking-item:hover {
-    background: #f1f5f9;
-}
+    .ranking-item:hover {
+        background: #f1f5f9;
+    }
 
-.ranking-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, #2563eb, #60a5fa);
-    opacity: 0.10;
-    transition: width 0.8s ease;
-}
+    .ranking-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+        opacity: 0.10;
+        transition: width 0.8s ease;
+    }
 
-.ranking-content {
-    position: relative;
-    z-index: 2;
-}
+    .ranking-content {
+        position: relative;
+        z-index: 2;
+    }
 
-.option-label {
-    font-size: 13px;   /* 🔥 lebih kecil */
-    font-weight: 600;
-    color: #1f2937;
-}
+    .option-label {
+        font-size: 13px;   /* 🔥 lebih kecil */
+        font-weight: 600;
+        color: #1f2937;
+    }
 
-.ranking-percent {
-    font-size: 14px;   /* 🔥 lebih kecil */
-    font-weight: 700;
-    color: #1f2937;
-}
+    .ranking-percent {
+        font-size: 14px;   /* 🔥 lebih kecil */
+        font-weight: 700;
+        color: #1f2937;
+    }
 
-.badge-top {
-    font-size: 10px;   /* 🔥 lebih kecil */
-    background: #2563eb;
-    color: #ffffff;
-    padding: 2px 6px;
-    border-radius: 14px;
-}
+    .badge-top {
+        font-size: 10px;   /* 🔥 lebih kecil */
+        background: #2563eb;
+        color: #ffffff;
+        padding: 2px 6px;
+        border-radius: 14px;
+    }
 
-.top-item {
-    background: #eef2ff;
-}
-
+    .top-item {
+        background: #eef2ff;
+    }
 </style>
 
 
-
-
 <div class="mt-4">
-    <div class="bg-success bg-opacity-10 text-success px-4 py-3 rounded-top
-                border-top border-3 border-success
+    <div class="bg-primary bg-opacity-10 text-primary px-4 py-3 rounded-top
+                border-top border-3 border-primary
                 d-flex justify-content-between align-items-center">
 
         <span>
@@ -336,6 +330,22 @@
     </div>
 </div>
 @endif
+
+
+<!-- tombol download survei -->
+@if($mode === 'survei')
+    <div class="text-end mt-3">
+        <a href="{{ route('admin.survei.download', [
+            'filter' => $filter,
+            'bulan'  => request('bulan'),
+            'tahun'  => request('tahun')
+        ]) }}" 
+        class="btn btn-danger">
+            Download PDF
+        </a>
+    </div>
+@endif
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

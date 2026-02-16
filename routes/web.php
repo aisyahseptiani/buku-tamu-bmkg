@@ -37,6 +37,9 @@ Route::post('/survei', [PengunjungController::class, 'storeSurvei'])
 Route::post('/survei/store', [PengunjungController::class, 'storeSurvei'])
     ->name('pengunjung.survei.store');
 
+//download hasil survei
+Route::get('/admin/survei/download', [DashboardController::class, 'downloadSurvei'])
+    ->name('admin.survei.download');
 
 
 /*
