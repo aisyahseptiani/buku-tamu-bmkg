@@ -165,14 +165,23 @@ class DashboardController extends Controller
             'admin.dashboard-pdf',
             compact('pengunjungs', 'periodeText')
         );
+        if ($filter === 'hari') {
 
-        return $pdf->download(
-            'dashboard-' .
-            $from->format('d-m-Y') .
-            '_sd_' .
-            $to->format('d-m-Y') .
-            '.pdf'
-        );
+            $namaFile = 'Laporan Data Pengunjung_' . $from->format('d-m-Y');
+
+        } elseif ($filter === 'bulan') {
+
+            $namaBulan = $from->translatedFormat('F');
+            $namaFile = 'Laporan Data Pengunjung_' . $namaBulan . '_' . $tahun;
+
+        } else {
+
+            $namaFile = 'Laporan Data Pengunjung_Tahun_' . $tahun;
+        }
+
+        $namaFile = str_replace(' ', '_', $namaFile) . '.pdf';
+
+        return $pdf->download($namaFile);
     }
 
     public function downloadSurvei(Request $request)
@@ -235,6 +244,25 @@ class DashboardController extends Controller
             'periodeText',
             'totalResponden'
         ))->setPaper('A4', 'portrait');
+
+        if ($filter === 'hari') {
+
+            $namaFile = 'Laporan_Survei_' . $from->format('d-m-Y');
+
+        } elseif ($filter === 'bulan') {
+
+            $namaBulan = $from->translatedFormat('F');
+            $namaFile = 'Laporan_Survei_' . $namaBulan . '_' . $tahun;
+
+        } else {
+
+            $namaFile = 'Laporan_Survei_Tahun_' . $tahun;
+        }
+
+        // Hilangkan spasi biar aman
+        $namaFile = str_replace(' ', '_', $namaFile) . '.pdf';
+
+        return $pdf->download($namaFile);
 
         return $pdf->download('Laporan_Survei_BMKG.pdf');
     }

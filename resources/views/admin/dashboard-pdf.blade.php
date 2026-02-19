@@ -203,7 +203,7 @@
 
             <div class="ttd-isi">
                 Plt. Kepala Stasiun Meteorologi Kelas I<br>
-                Sultan Syarif Kasim II
+                Sultan Syarif Kasim II Pekanbaru
             </div>
 
             <div class="ttd-nama">

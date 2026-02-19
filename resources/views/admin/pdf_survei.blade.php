@@ -180,19 +180,24 @@ table.data th {
 <!-- ================= TOTAL RESPONDEN ================= -->
 <table class="data">
     <tr>
-        <td width="70%" class="shading"><strong>Total Responden</strong></td>
-        <td width="30%" class="text-center shading">
+        <td width="60%" class="shading">
+            <strong>Total Responden</strong>
+        </td>
+        <td width="40%" class="text-center shading">
             <strong>{{ $totalResponden }} Orang</strong>
         </td>
     </tr>
+
 </table>
+
+
 
 <!-- ================= TTD ================= -->
 <div class="signature">
     <div class="signature-box">
         Pekanbaru, {{ now()->translatedFormat('d F Y') }}<br>
-        Plt. Kepala Stasiun Meteorologi<br>
-        Sultan Syarif Kasim II<br>
+        Plt. Kepala Stasiun Meteorologi Klas I<br>
+        Sultan Syarif Kasim II Pekanbaru<br>
 
         <div class="signature-name">
             Warih Budi Lestari

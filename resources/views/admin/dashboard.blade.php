@@ -15,7 +15,7 @@
 {{-- ================= HEADER ================= --}}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h3 class="fw-bold mb-1">Dashboard</h3>
+        <h3 class="fw-bold mb-1">Dashboard Buku Tamu Digital</h3>
         <div class="text-muted">{{ $today }}</div>
     </div>
 </div>
@@ -193,13 +193,20 @@
 {{-- ================= DATA SURVEI ================= --}}
 @if($mode === 'survei' && !empty($rekapSurvei))
 
+<style>
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px; /* tinggi ideal untuk 2 kolom */
+}
+</style>
+
 {{-- ===================== --}}
 {{-- SUMMARY SECTION --}}
 {{-- ===================== --}}
-<div class="card border-0 shadow-sm rounded-4 mb-5">
+<div class="card border-0 shadow-sm rounded-4 mb-4">
     <div class="card-body p-4 d-flex justify-content-between align-items-center">
 
-        {{-- LEFT --}}
         <div>
             <div class="text-muted small mb-1">
                 Total Responden
@@ -209,61 +216,60 @@
             </div>
         </div>
 
-        {{-- RIGHT --}}
-        <div class="d-flex align-items-center gap-3">
-
-            <a href="{{ route('admin.survei.download', [
-                'filter' => $filter,
-                'bulan'  => request('bulan'),
-                'tahun'  => request('tahun')
-            ]) }}" 
-            class="btn btn-outline-primary rounded-pill px-4">
-                <i class="bi bi-download me-1"></i>
-                Download PDF
-            </a>
-
-        </div>
+        <a href="{{ route('admin.survei.download', [
+            'filter' => $filter,
+            'bulan'  => request('bulan'),
+            'tahun'  => request('tahun')
+        ]) }}" 
+        class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-download me-1"></i>
+            Download PDF
+        </a>
 
     </div>
 </div>
 
 
 {{-- ===================== --}}
-{{-- LOOP PERTANYAAN --}}
+{{-- GRID 2 KOLOM --}}
 {{-- ===================== --}}
+<div class="row">
+
 @foreach($rekapSurvei as $index => $soal)
 
 @php
     $labels = collect($soal['opsi'])->pluck('label');
     $data = collect($soal['opsi'])->pluck('total');
     $max = $data->max();
+    $dominant = collect($soal['opsi'])->firstWhere('total', $max);
 @endphp
 
-<div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-body p-4">
+<div class="col-md-6 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
 
-        <h6 class="fw-semibold mb-4">
-            {{ $soal['pertanyaan'] }}
-        </h6>
+            <h6 class="fw-semibold mb-3">
+                {{ $soal['pertanyaan'] }}
+            </h6>
 
-        <canvas id="chart{{ $index }}" height="120"></canvas>
-
-        @php
-            $dominant = collect($soal['opsi'])->firstWhere('total', $max);
-        @endphp
-
-        @if($dominant && $max > 0)
-            <div class="mt-3 small text-muted">
-                Mayoritas responden memilih 
-                <span class="fw-semibold text-primary">
-                    {{ $dominant['label'] }}
-                </span>
-                ({{ round(($max / $data->sum()) * 100) }}%)
+            <div class="chart-wrapper">
+                <canvas id="chart{{ $index }}"></canvas>
             </div>
-        @endif
 
+            @if($dominant && $max > 0)
+                <div class="mt-3 small text-muted">
+                    Mayoritas responden memilih 
+                    <span class="fw-semibold text-primary">
+                        {{ $dominant['label'] }}
+                    </span>
+                    ({{ round(($max / $data->sum()) * 100) }}%)
+                </div>
+            @endif
+
+        </div>
     </div>
 </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -279,8 +285,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 backgroundColor: {!! json_encode(
                     collect($soal['opsi'])->map(function($o) use ($max){
                         return $o['total'] == $max 
-                            ? 'rgba(13,110,253,0.8)' 
-                            : 'rgba(108,117,125,0.4)';
+                            ? 'rgba(13,110,253,0.85)' 
+                            : 'rgba(108,117,125,0.35)';
                     })
                 ) !!},
                 borderRadius: 8,
@@ -290,6 +296,7 @@ document.addEventListener("DOMContentLoaded", function() {
         options: {
             indexAxis: 'y',
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false }
             },
@@ -309,7 +316,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         }
-
     });
 
 });
@@ -317,7 +323,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 @endforeach
 
+</div>
+
 @endif
+
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -351,35 +361,38 @@ document.addEventListener("DOMContentLoaded", function() {
         options: {
             indexAxis: 'y',
             responsive: true,
-            animation: {
-                duration: 1200
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 0,
+                    right: 10,
+                    top: 5,
+                    bottom: 5
+                }
             },
             plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let value = context.raw;
-                            let percent = totalRespon{{ $index }} 
-                                ? ((value / totalRespon{{ $index }}) * 100).toFixed(1)
-                                : 0;
-                            return value + " respon (" + percent + "%)";
-                        }
-                    }
-                }
+                legend: { display: false }
             },
             scales: {
                 x: {
                     beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        stepSize: 1
+                    },
                     grid: {
-                        color: "#e9ecef"
+                        color: 'rgba(0,0,0,0.05)'
                     }
                 },
                 y: {
-                    grid: { display: false }
+                    grid: { display: false },
+                    ticks: {
+                        padding: 5
+                    }
                 }
             }
         }
+
     });
 
     @endforeach
