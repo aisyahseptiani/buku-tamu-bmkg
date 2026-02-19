@@ -119,14 +119,37 @@ class DashboardController extends Controller
         $pengunjungs = Pengunjung::whereBetween('created_at', [$from, $to])->get();
         $total = $pengunjungs->count();
 
+        // WAJIB selalu ada
+        $grafik = collect();
+        $rekapSurvei = [];
+        $totalResponden = 0;
+
+        if ($filter === 'tahun') {
+
+            $grafik = Pengunjung::selectRaw('MONTH(created_at) as bulan, COUNT(*) as total')
+                ->whereBetween('created_at', [$from, $to])
+                ->groupBy('bulan')
+                ->orderBy('bulan')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'label' => \Carbon\Carbon::create()->month($item->bulan)->translatedFormat('F'),
+                        'total' => $item->total
+                    ];
+                });
+        }
+
         return view('admin.dashboard', compact(
             'mode',
             'filter',
             'pengunjungs',
             'grafik',
             'total',
-            'periodeText'
+            'periodeText',
+            'rekapSurvei',
+            'totalResponden'
         ));
+
     }
 
     /*
